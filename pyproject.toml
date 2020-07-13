@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "jupyter_ascending"
+version = "0.1.6"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+jupytext = "^1.3.4"
+jsonrpcserver = {extras = ["requests"], version = "^4.1.2"}
+jsonrpcclient = {extras = ["requests"], version = "^3.3.5"}
+ipywidgets = "^7.5.1"
+loguru = "^0.4.1"
+attrs = "^19.3.0"
+toml = "^0.10.0"
+edlib = "^1.3.8"
+
+[tool.poetry.dev-dependencies]
+python-language-server = {extras = ["all"], version = "^0.31.9"}
+pyls-mypy = "^0.1.8"
+pyfixfmt = "^0.9.0"
+
+[tool.poetry.scripts]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+
