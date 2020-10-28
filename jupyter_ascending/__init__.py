@@ -13,7 +13,9 @@ from jupyter_ascending.widget import SyncWidget
 
 
 def _jupyter_server_extension_paths():
-    return []
+    return [{
+        "module": "jupyter_ascending",
+    }]
 
 
 __all__ = [
