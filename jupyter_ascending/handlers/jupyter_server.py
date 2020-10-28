@@ -8,6 +8,8 @@ from typing import TypeVar
 
 import attr
 from jsonrpcclient import request
+from jsonrpcclient.exceptions import ReceivedNon2xxResponseError
+from requests.exceptions import ConnectionError
 
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
@@ -84,13 +86,18 @@ def get_server_for_notebook(notebook_path: str) -> Optional[str]:
 
 
 def request_notebook_command(json_request: GenericJsonRequest):
-    request(
-        EXECUTE_HOST_URL,
-        perform_notebook_request.__name__,
-        command_name=_map_json_request_to_function_name(json_request),
-        notebook_path=json_request.file_name,
-        data=attr.asdict(json_request),
-    )
+    try:
+        request(
+            EXECUTE_HOST_URL,
+            perform_notebook_request.__name__,
+            command_name=_map_json_request_to_function_name(json_request),
+            notebook_path=json_request.file_name,
+            data=attr.asdict(json_request),
+        )
+    except ConnectionError as e:
+        J_LOGGER.warning(f"Unable to connect to server. Perhaps notebook is not running? {e}")
+    except ReceivedNon2xxResponseError as e:
+        J_LOGGER.warning(f"Unable to process request. Perhaps something else is running on this port? {e}")
 
 
 def _map_json_request_to_function_name(json_request: GenericJsonRequest) -> str:
@@ -107,7 +114,14 @@ def _map_json_request_to_function_name(json_request: GenericJsonRequest) -> str:
 
 
 def start_server_in_thread():
-    server_executor = HTTPServer(EXECUTE_HOST_LOCATION, JupyterServerRequestHandler)
+    try:
+        server_executor = HTTPServer(EXECUTE_HOST_LOCATION, JupyterServerRequestHandler)
+    except OSError:
+        print(f"It appears you already are using {EXECUTE_HOST_LOCATION}")
+        print("Use the environment variable: 'JUPYTER_ASCENDING_EXECUTE_PORT' to set a new port")
+
+        return
+
     server_executor_thread = threading.Thread(target=server_executor.serve_forever, args=tuple())
     server_executor_thread.start()
 

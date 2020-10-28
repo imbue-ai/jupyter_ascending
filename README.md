@@ -28,19 +28,5 @@ $ jupyter serverextension list
 
 ## Usage in Vim
 
-```vim
-" In autoload/nb_sync.vim
-function! nb_sync#sync() abort
-  let file_name = expand("%:p")
+To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyter_ascending.vim)
 
-  if match(file_name, ".synced.py") < 0
-    return
-  endif
-
-  let g:last_nb_sync_val = system("python -m jupyter_ascending.requests.sync --filename '" . expand("%:p") . "'")
-endfunction
-
-function! nb_sync#execute() abort
-  let g:last_nb_exec_val = system("python -m jupyter_ascending.requests.execute --filename '" . expand("%:p") . "' --linenumber " . line('.'))
-endfunction
-```

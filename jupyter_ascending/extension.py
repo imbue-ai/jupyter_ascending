@@ -31,6 +31,8 @@ def load_jupyter_server_extension(ipython):
     J_LOGGER.info("SERVER LOAD: " + time.ctime())
 
     server = jupyter_server.start_server_in_thread()
+    if not server:
+        return
 
     # HACK:
     # A bit of a hack to make sure the server gets shutdown when we're done here.
