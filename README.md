@@ -26,6 +26,14 @@ $ jupyter nbextension     list
 $ jupyter serverextension list
 ```
 
+## About
+
+Jupyter Ascending syncs the state between a python script and a Jupyter notebook.
+
+At the moment, it syncs between python scripts that end with `.synced.py` and Jupyter notebooks with names that end with `.synced.ipynb`.
+
+To get a properly formatted `.synced.py` file, you should use `jupytext` to generate one. You can convert it to a Jupyter notebook with `jupytext` as well!
+
 ## Usage in Vim
 
 To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyter_ascending.vim)
