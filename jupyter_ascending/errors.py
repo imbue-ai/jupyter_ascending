@@ -1,0 +1,2 @@
+class UnableToFindNotebookException(Exception):
+    pass

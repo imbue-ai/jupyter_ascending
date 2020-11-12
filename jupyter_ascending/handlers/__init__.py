@@ -54,7 +54,7 @@ def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPReque
 
         # Return response
         self.send_response(response.http_status)
-        self.send_header("Content-type", "application/json")
+        self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(str(response).encode())
 

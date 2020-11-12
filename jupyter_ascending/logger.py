@@ -14,6 +14,8 @@ config = {
 
 if SHOW_TO_STDOUT:
     config["handlers"].append({"sink": sys.stdout, "format": "{time} - {message}", "level": "INFO"})
+else:
+    config["handlers"].append({"sink": sys.stdout, "format": "{time} - {message}", "level": "WARNING"})
 
 logger.configure(**config)  # type: ignore
 
