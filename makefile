@@ -4,8 +4,7 @@ JUPYTER_ASCENDING_PYCHARM_VERSION := 1.0
 PYCHARM_VERSION := 2019.3
 
 install_dev:
-	pip install -e .
-	npm run build
+	poetry install
 	jupyter nbextension install --py --symlink --sys-prefix jupyter_ascending
 	jupyter nbextension enable jupyter_ascending --py --sys-prefix
 

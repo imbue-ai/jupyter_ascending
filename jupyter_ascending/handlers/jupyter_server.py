@@ -17,9 +17,11 @@ from jupyter_ascending.errors import UnableToFindNotebookException
 from jupyter_ascending.functional import get_matching_tail_tokens
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
+from jupyter_ascending.handlers.jupyter_notebook import handle_execute_all_request
 from jupyter_ascending.handlers.jupyter_notebook import handle_execute_request
 from jupyter_ascending.handlers.jupyter_notebook import handle_get_status_request
 from jupyter_ascending.handlers.jupyter_notebook import handle_sync_request
+from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import GetStatusRequest
 from jupyter_ascending.json_requests import JsonBaseRequest
@@ -144,6 +146,8 @@ def _map_json_request_to_function_name(json_request: GenericJsonRequest) -> str:
 
     if isinstance(json_request, ExecuteRequest):
         return handle_execute_request.__name__
+    elif isinstance(json_request, ExecuteAllRequest):
+        return handle_execute_all_request.__name__
     elif isinstance(json_request, SyncRequest):
         return handle_sync_request.__name__
     elif isinstance(json_request, GetStatusRequest):

@@ -15,6 +15,11 @@ class ExecuteRequest(JsonBaseRequest):
 
 
 @dataclass
+class ExecuteAllRequest(JsonBaseRequest):
+    pass
+
+
+@dataclass
 class SyncRequest(JsonBaseRequest):
     contents: str
 

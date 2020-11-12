@@ -15,6 +15,7 @@ from jsonrpcclient import request
 from jupyter_ascending._environment import EXECUTE_HOST_URL
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
+from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
 from jupyter_ascending.json_requests import SyncRequest
@@ -102,6 +103,17 @@ def handle_execute_request(data: dict) -> str:
     execute_cell_contents(comm, request.cell_index)
 
     return f"Executing cell `{request.cell_index}`"
+
+
+@notebook_server_methods.add
+def handle_execute_all_request(data: dict) -> str:
+    request = ExecuteAllRequest(**data)
+
+    # TODO: Remind mysefyl why I don't need to say the filename here...
+    comm = get_comm()
+    execute_all_cells(comm)
+
+    return f"Executing all cells in {request.file_name}"
 
 
 @notebook_server_methods.add
@@ -341,3 +353,7 @@ def perform_op_code(
 
 def execute_cell_contents(comm: Comm, cell_number: int) -> None:
     comm.send({"command": "execute", "cell_number": cell_number})
+
+
+def execute_all_cells(comm: Comm) -> None:
+    comm.send({"command": "execute_all"})
