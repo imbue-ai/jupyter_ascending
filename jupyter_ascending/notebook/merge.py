@@ -22,7 +22,7 @@ Number = Union[int, float]
 
 
 def _get_raw_contents(notebook: NotebookContents) -> Tuple[str, ...]:
-    return tuple("\n".join(x.source) for x in notebook.cells)
+    return tuple(x.complete_source for x in notebook.cells)
 
 
 class OpCodes(Enum):

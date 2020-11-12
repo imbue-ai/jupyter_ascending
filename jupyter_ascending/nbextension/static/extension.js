@@ -2,195 +2,217 @@
 
 // debugger;
 define(["base/js/namespace"], function (Jupyter) {
-  "use strict";
+    "use strict";
 
-  window["requirejs"].config({
-    map: {
-      "*": {
-        jupyter_ascending: "nbextensions/jupyter_ascending/index",
-      },
-    },
-  });
+    window["requirejs"].config({
+        map: {
+            "*": {
+                jupyter_ascending: "nbextensions/jupyter_ascending/index",
+            },
+        },
+    });
 
-  const IS_DEBUG = false;
-  const TARGET_NAME = "AUTO_SYNC::notebook";
+    const IS_DEBUG = false;
+    const TARGET_NAME = "AUTO_SYNC::notebook";
 
-  function get_notebook_name() {
-    // return window.document.getElementById("notebook_name").innerHTML;
-    return Jupyter.notebook.notebook_path;
-  }
-
-  function is_synced_notebook() {
-    return get_notebook_name().includes(".synced.ipynb");
-  }
-
-  function get_cell_from_notebook(cell_number) {
-    let cell = Jupyter.notebook.get_cell(cell_number);
-
-    while (cell === null) {
-      // Kind of meh hack to just keep spamming cells at bottom until we get to the cell we want.
-      Jupyter.notebook.insert_cell_at_bottom();
-
-      cell = Jupyter.notebook.get_cell(cell_number);
+    function get_notebook_name() {
+        // return window.document.getElementById("notebook_name").innerHTML;
+        return Jupyter.notebook.notebook_path;
     }
 
-    return cell;
-  }
+    function is_synced_notebook() {
+        return get_notebook_name().includes(".synced.ipynb");
+    }
 
-  function update_cell_contents(data) {
-    let cell = get_cell_from_notebook(data.cell_number);
+    function get_cell_from_notebook(cell_number) {
+        let cell = Jupyter.notebook.get_cell(cell_number);
 
-    cell.set_text(data.cell_contents);
-  }
+        while (cell === null) {
+            // Kind of meh hack to just keep spamming cells at bottom until we get to the cell we want.
+            Jupyter.notebook.insert_cell_at_bottom();
 
-  function execute_cell_contents(data) {
-    let cell = get_cell_from_notebook(data.cell_number);
+            cell = Jupyter.notebook.get_cell(cell_number);
+        }
 
-    cell.focus_cell();
-    cell.execute();
+        return cell;
+    }
 
-    // TODO: ??
-    cell.focus_cell();
-  }
+    function update_cell_contents(data) {
+        let cell = get_cell_from_notebook(data.cell_number);
 
-  function execute_all_cells() {
-    Jupyter.notebook.execute_all_cells();
-  }
+        cell.set_text(data.cell_contents);
 
-  function op_code__delete_cells(data) {
-    console.log("Deleting cell...", data);
+        // Changed cell types.
+        if (cell.cell_type !== data.cell_type) {
+            if (data.cell_type === "markdown") {
+                Jupyter.notebook.cells_to_markdown([data.cell_number]);
+            } else if (data.cell_type === "code") {
+                Jupyter.notebook.cells_to_code([data.cell_number]);
+            }
+        }
 
-    Jupyter.notebook.delete_cells(data.cell_indices);
-  }
+        // Markdown cells need a re-render when we update them.
+        if (cell.cell_type === "markdown") {
+            cell.render();
+        }
+    }
 
-  function op_code__insert_cell(data) {
-    console.log("Inserting cell...", data);
+    function execute_cell_contents(data) {
+        let cell = get_cell_from_notebook(data.cell_number);
 
-    let new_cell = Jupyter.notebook.insert_cell_at_index(
-      data.cell_type,
-      data.cell_number
-    );
-    new_cell.set_text(data.cell_contents);
-  }
+        cell.focus_cell();
+        cell.execute();
 
-  function op_code__replace_cell(data) {
-    console.log("Replacing cell...", data);
+        // TODO: ??
+        cell.focus_cell();
+    }
 
-    update_cell_contents(data);
-  }
+    function execute_all_cells() {
+        Jupyter.notebook.execute_all_cells();
+    }
 
-  // function focus_cell(data) {
-  //   let cell = get_cell_from_notebook(data.cell_number);
+    function op_code__delete_cells(data) {
+        console.log("Deleting cell...", data);
 
-  //   cell.focus_cell();
-  //   // TODO: Focus the output so you can see all of it if it's long
-  // }
+        Jupyter.notebook.delete_cells(data.cell_indices);
+    }
 
-  function get_status(comm_obj) {
-    comm_obj.send({
-      command: "update_status",
-      status: Jupyter.notebook.get_cells(),
-    });
-  }
+    function op_code__insert_cell(data) {
+        console.log("Inserting cell...", data);
 
-  function start_sync_notebook(comm_obj, msg) {
-    comm_obj.send({
-      command: "merge_notebooks",
-      javascript_cells: Jupyter.notebook.get_cells(),
-      new_notebook: msg.content.data.cells,
-    });
-  }
+        let new_cell = Jupyter.notebook.insert_cell_at_index(
+            data.cell_type,
+            data.cell_number
+        );
+        new_cell.set_text(data.cell_contents);
 
-  function create_and_register_comm() {
-    // Make sure that the extension is loaded.
-    //  TODO: Perhaps it's possible to not do  this if it's already loaded,
-    //  but it's fine to be run multiple times.
-    //
-    //  As a note, I think some people would probably disapprove of this?
-    //  It just runs code... but that's what plugins do?
-    Jupyter.notebook.kernel.execute("%load_ext jupyter_ascending");
+        // Markdown cells need a re-render when we update them.
+        if (new_cell.cell_type === "markdown") {
+            new_cell.render();
+        }
+    }
 
-    Jupyter.notebook.kernel.comm_manager.register_target(
-      TARGET_NAME,
-      // comm is the frontend comm instance
-      // msg is the comm_open message, which can carry data
-      function (comm, _msg) {
-        // Register handlers for later messages:
-        comm.on_msg(function (msg) {
-          if (IS_DEBUG) {
-            console.log("Processing a message");
-            console.log(msg);
-          }
+    function op_code__replace_cell(data) {
+        console.log("Replacing cell...", data);
 
-          const data = msg.content.data;
-          const command = data.command;
+        update_cell_contents(data);
+    }
 
-          switch (command) {
-            case "start_sync_notebook":
-              console.log("Starting Sync");
-              return start_sync_notebook(comm, msg);
-            case "op_code__delete_cells":
-              return op_code__delete_cells(data);
-            case "op_code__insert_cell":
-              return op_code__insert_cell(data);
-            case "op_code__replace_cell":
-              return op_code__replace_cell(data);
-            case "get_status":
-              console.log("Sending get_status");
-              return get_status(comm);
-            case "update":
-              return update_cell_contents(data);
-            case "execute":
-              return execute_cell_contents(data);
-            case "execute_all":
-              return execute_all_cells();
-            case "status":
-              console.log("give em the status");
-              return;
-            default:
-              console.log("Got an unexpected message: ", msg);
-              return;
-          }
+    // function focus_cell(data) {
+    //   let cell = get_cell_from_notebook(data.cell_number);
+
+    //   cell.focus_cell();
+    //   // TODO: Focus the output so you can see all of it if it's long
+    // }
+
+    function get_status(comm_obj) {
+        comm_obj.send({
+            command: "update_status",
+            status: Jupyter.notebook.get_cells(),
         });
+    }
 
-        comm.on_close(function (msg) {
-          console.log("close", msg);
+    function start_sync_notebook(comm_obj, msg) {
+        comm_obj.send({
+            command: "merge_notebooks",
+            javascript_cells: Jupyter.notebook.get_cells(),
+            new_notebook: msg.content.data.cells,
         });
-      }
-    );
-  }
+    }
 
-  // Export the required load_ipython_extension function
-  return {
-    load_ipython_extension: function () {
-      Jupyter.notebook.config.loaded
-        .then(
-          function on_config_loaded() {
-            console.log("Loaded config...");
-          },
-          function on_config_error() {
-            console.log("ERROR OF LOADING...???");
-          }
-        )
-        .then(function actually_load() {
-          console.log("===================================");
-          // console.log(ascend);
-          console.log("Loading Jupyter Ascending extension...");
-          console.log("Opening... ", get_notebook_name());
-          console.log("Is synced: ", is_synced_notebook());
+    function create_and_register_comm() {
+        // Make sure that the extension is loaded.
+        //  TODO: Perhaps it's possible to not do  this if it's already loaded,
+        //  but it's fine to be run multiple times.
+        //
+        //  As a note, I think some people would probably disapprove of this?
+        //  It just runs code... but that's what plugins do?
+        Jupyter.notebook.kernel.execute("%load_ext jupyter_ascending");
 
-          console.log("Attemping create comm...");
-          if (Jupyter.notebook.kernel) {
-            create_and_register_comm();
-          } else {
-            Jupyter.notebook.events.one("kernel_ready.Kernel", () => {
-              create_and_register_comm();
-            });
-          }
-          console.log("... success!");
+        Jupyter.notebook.kernel.comm_manager.register_target(
+            TARGET_NAME,
+            // comm is the frontend comm instance
+            // msg is the comm_open message, which can carry data
+            function (comm, _msg) {
+                // Register handlers for later messages:
+                comm.on_msg(function (msg) {
+                    if (IS_DEBUG) {
+                        console.log("Processing a message");
+                        console.log(msg);
+                    }
 
-          console.log("===================================");
-        });
-    },
-  };
+                    const data = msg.content.data;
+                    const command = data.command;
+
+                    switch (command) {
+                        case "start_sync_notebook":
+                            console.log("Starting Sync");
+                            return start_sync_notebook(comm, msg);
+                        case "op_code__delete_cells":
+                            return op_code__delete_cells(data);
+                        case "op_code__insert_cell":
+                            return op_code__insert_cell(data);
+                        case "op_code__replace_cell":
+                            return op_code__replace_cell(data);
+                        case "get_status":
+                            console.log("Sending get_status");
+                            return get_status(comm);
+                        case "update":
+                            return update_cell_contents(data);
+                        case "execute":
+                            return execute_cell_contents(data);
+                        case "execute_all":
+                            return execute_all_cells();
+                        case "status":
+                            console.log("give em the status");
+                            return;
+                        default:
+                            console.log("Got an unexpected message: ", msg);
+                            return;
+                    }
+                });
+
+                comm.on_close(function (msg) {
+                    console.log("close", msg);
+                });
+            }
+        );
+    }
+
+    // Export the required load_ipython_extension function
+    return {
+        load_ipython_extension: function () {
+            Jupyter.notebook.config.loaded
+                .then(
+                    function on_config_loaded() {
+                        console.log("Loaded config...");
+                    },
+                    function on_config_error() {
+                        console.log("ERROR OF LOADING...???");
+                    }
+                )
+                .then(function actually_load() {
+                    console.log("===================================");
+                    // console.log(ascend);
+                    console.log("Loading Jupyter Ascending extension...");
+                    console.log("Opening... ", get_notebook_name());
+                    console.log("Is synced: ", is_synced_notebook());
+
+                    console.log("Attemping create comm...");
+                    if (Jupyter.notebook.kernel) {
+                        create_and_register_comm();
+                    } else {
+                        Jupyter.notebook.events.one(
+                            "kernel_ready.Kernel",
+                            () => {
+                                create_and_register_comm();
+                            }
+                        );
+                    }
+                    console.log("... success!");
+
+                    console.log("===================================");
+                });
+        },
+    };
 });

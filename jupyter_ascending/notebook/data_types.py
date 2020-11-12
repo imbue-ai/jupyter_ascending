@@ -42,6 +42,10 @@ class JupyterCell:
     def joined_source(self) -> str:
         return "".join(self.source)
 
+    @property
+    def complete_source(self) -> str:
+        return f"{self.cell_type}::::{self.joined_source}"
+
     # def __eq__(self, o):
     #     if not isinstance(o, JupyterCell):
     #         return False
@@ -59,7 +63,7 @@ class NotebookContents:
     # TODO: Make sure cells are in the right order
 
     def _cell_insides(self):
-        return [(x.index, x.source) for x in self.cells]
+        return [(x.index, x.cell_type, x.source) for x in self.cells]
 
     def content_equals(self, other: "NotebookContents") -> bool:
         return self._cell_insides() == other._cell_insides()

@@ -17,15 +17,7 @@ from jupyter_ascending.errors import UnableToFindNotebookException
 from jupyter_ascending.functional import get_matching_tail_tokens
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
-from jupyter_ascending.handlers.jupyter_notebook import handle_execute_all_request
-from jupyter_ascending.handlers.jupyter_notebook import handle_execute_request
-from jupyter_ascending.handlers.jupyter_notebook import handle_get_status_request
-from jupyter_ascending.handlers.jupyter_notebook import handle_sync_request
-from jupyter_ascending.json_requests import ExecuteAllRequest
-from jupyter_ascending.json_requests import ExecuteRequest
-from jupyter_ascending.json_requests import GetStatusRequest
 from jupyter_ascending.json_requests import JsonBaseRequest
-from jupyter_ascending.json_requests import SyncRequest
 from jupyter_ascending.logger import J_LOGGER
 
 GenericJsonRequest = TypeVar("GenericJsonRequest", bound=JsonBaseRequest)
@@ -124,7 +116,7 @@ def request_notebook_command(json_request: GenericJsonRequest):
         result = request(
             EXECUTE_HOST_URL,
             perform_notebook_request.__name__,
-            command_name=_map_json_request_to_function_name(json_request),
+            command_name=type(json_request).__name__,
             notebook_path=json_request.file_name,
             data=attr.asdict(json_request),
         )
@@ -139,21 +131,6 @@ def request_notebook_command(json_request: GenericJsonRequest):
         J_LOGGER.error(f"Unable to connect to server. Perhaps notebook is not running? {e}")
     except ReceivedNon2xxResponseError as e:
         J_LOGGER.error(f"Unable to process request. Perhaps something else is running on this port? {e}")
-
-
-def _map_json_request_to_function_name(json_request: GenericJsonRequest) -> str:
-    # TODO: Move this to a dictionary, and check all non-abstract children of BaseJsonRequest
-
-    if isinstance(json_request, ExecuteRequest):
-        return handle_execute_request.__name__
-    elif isinstance(json_request, ExecuteAllRequest):
-        return handle_execute_all_request.__name__
-    elif isinstance(json_request, SyncRequest):
-        return handle_sync_request.__name__
-    elif isinstance(json_request, GetStatusRequest):
-        return handle_get_status_request.__name__
-    else:
-        assert False, json_request
 
 
 def start_server_in_thread():

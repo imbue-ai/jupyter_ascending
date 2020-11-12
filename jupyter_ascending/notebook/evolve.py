@@ -21,3 +21,14 @@ def evolve_cell_source(contents: NotebookContents, index: int, source: List[str]
             new_cells.append(cell)
 
     return evolve_notebook_cells(contents, new_cells)
+
+
+def evolve_cell_type(contents: NotebookContents, index: int, cell_type: str) -> NotebookContents:
+    new_cells: List[JupyterCell] = []
+    for cell in contents.cells:
+        if cell.index == index:
+            new_cells.append(attr.evolve(cell, cell_type=cell_type))
+        else:
+            new_cells.append(cell)
+
+    return evolve_notebook_cells(contents, new_cells)

@@ -3,6 +3,7 @@ import attr
 from jupyter_ascending.notebook.data_types import JupyterCell
 from jupyter_ascending.notebook.data_types import NotebookContents
 from jupyter_ascending.notebook.evolve import evolve_cell_source
+from jupyter_ascending.notebook.evolve import evolve_cell_type
 from jupyter_ascending.notebook.evolve import evolve_notebook_cells
 from jupyter_ascending.notebook.merge import OpCodes
 from jupyter_ascending.notebook.merge import opcode_merge_cell_contents
@@ -162,3 +163,12 @@ def test_insert_a_new_cell_and_update_another():
 
     assert opcodes[1].current == (1, 2)
     assert opcodes[1].updated == (1, 3)
+
+
+def test_changing_cell_type_sends_replace():
+    new_contents = evolve_cell_type(SIMPLE_CONTENTS, 0, "markdown")
+    opcodes = opcode_merge_cell_contents(SIMPLE_CONTENTS, new_contents)
+
+    assert new_contents != SIMPLE_CONTENTS
+    assert len(opcodes) == 1
+    assert opcodes[0].op_code == OpCodes.REPLACE

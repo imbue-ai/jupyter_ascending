@@ -7,6 +7,7 @@ install_dev:
 	poetry install
 	jupyter nbextension install --py --symlink --sys-prefix jupyter_ascending
 	jupyter nbextension enable jupyter_ascending --py --sys-prefix
+	jupyter serverextension enable jupyter_ascending --sys-prefix --py
 
 pycharm_install:
 	echo "This probably will not work for you."

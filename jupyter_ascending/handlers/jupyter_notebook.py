@@ -1,10 +1,12 @@
 import threading
 from http.server import HTTPServer
+from inspect import signature
 from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Type
 
 import ipywidgets as widgets
 import jupytext
@@ -18,6 +20,7 @@ from jupyter_ascending.handlers import generate_request_handler
 from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
+from jupyter_ascending.json_requests import GetStatusRequest
 from jupyter_ascending.json_requests import SyncRequest
 from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.notebook.data_types import JupyterCell
@@ -95,9 +98,29 @@ def status_func(comm, open_msg):
         J_LOGGER.warning(msg)
 
 
-@notebook_server_methods.add
-def handle_execute_request(data: dict) -> str:
-    request = ExecuteRequest(**data)
+def dispatch_json_request(f):
+    """
+    Automatically dispatch a json request based on the request_type.
+    This means we don't have to repeat ourselves.
+
+    Adds it to notebook_server_methods
+    """
+
+    # Get the type from the first argument of the function.
+    #   This will define the name that we use to generate the method handling.
+    request_type = signature(f).parameters["request_type"].annotation.__args__[0]
+
+    def wrapped(data: Dict) -> str:
+        return f(request_type, data)
+
+    wrapped.__name__ = request_type.__name__
+
+    return notebook_server_methods.add(wrapped)
+
+
+@dispatch_json_request
+def handle_execute_request(request_type: Type[ExecuteRequest], data: dict) -> str:
+    request = request_type(**data)
 
     comm = get_comm()
     execute_cell_contents(comm, request.cell_index)
@@ -105,9 +128,9 @@ def handle_execute_request(data: dict) -> str:
     return f"Executing cell `{request.cell_index}`"
 
 
-@notebook_server_methods.add
-def handle_execute_all_request(data: dict) -> str:
-    request = ExecuteAllRequest(**data)
+@dispatch_json_request
+def handle_execute_all_request(request_type: Type[ExecuteAllRequest], data: dict) -> str:
+    request = request_type(**data)
 
     # TODO: Remind mysefyl why I don't need to say the filename here...
     comm = get_comm()
@@ -116,28 +139,30 @@ def handle_execute_all_request(data: dict) -> str:
     return f"Executing all cells in {request.file_name}"
 
 
-@notebook_server_methods.add
-def handle_sync_request(data: dict) -> str:
-    request = SyncRequest(**data)
+@dispatch_json_request
+def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
+    request = request_type(**data)
 
     comm = get_comm()
 
     result = jupytext.reads(request.contents, fmt="py:percent")
+    # import ipdb
+    # ipdb.set_trace()
     update_cell_contents(comm, result)
 
     return "Syncing all cells"
 
 
-@notebook_server_methods.add
-def handle_focus_cell_request(data: dict) -> str:
-    request = FocusCellRequest(**data)
+@dispatch_json_request
+def handle_focus_cell_request(request_type: Type[FocusCellRequest], data: dict) -> str:
+    request = request_type(**data)
 
     print(request)
     raise NotImplementedError
 
 
-@notebook_server_methods.add
-def handle_get_status_request(data: dict) -> str:
+@dispatch_json_request
+def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) -> str:
     J_LOGGER.info("Attempting get_status")
 
     comm = get_comm()
@@ -307,6 +332,7 @@ def perform_op_code(
                     {
                         "command": "op_code__replace_cell",
                         "cell_number": cell_number,
+                        "cell_type": updated_notebook.cells[cell_number].cell_type,
                         "cell_contents": updated_notebook.cells[cell_number].joined_source,
                     }
                 )
