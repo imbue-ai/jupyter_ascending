@@ -13,7 +13,7 @@ config = {
 
 
 if SHOW_TO_STDOUT:
-    config["handlers"].append({"sink": sys.stdout, "format": "{time} - {message}", "level": "INFO"})
+    config["handlers"].append({"sink": sys.stdout, "format": "{time} - {message}", "level": LOG_LEVEL})
 else:
     config["handlers"].append({"sink": sys.stdout, "format": "{time} - {message}", "level": "WARNING"})
 
