@@ -10,6 +10,8 @@ CELL_SEPARATOR = "# %%"
 
 
 def send(file_name: str, line_number: int, *args, **kwargs):
+    J_LOGGER.debug("Starting execute request")
+
     # Always pass absolute path
     file_name = str(Path(file_name).absolute())
 
@@ -19,15 +21,17 @@ def send(file_name: str, line_number: int, *args, **kwargs):
     with open(file_name, "r") as reader:
         for index, line in enumerate(reader):
             if line.startswith(CELL_SEPARATOR):
-                J_LOGGER.debug(f"Found another new cell: {line}")
+                J_LOGGER.debug(f"Found another new cell on line number: {index}")
                 cell_index += 1
+                J_LOGGER.debug(f"    New cell index {cell_index}")
 
             # No need to loop through the whole file, just execute when we get there
             if index == int(line_number):
-                jupyter_server.request_notebook_command(request_obj(cell_index=cell_index))
-                return
+                break
 
-    jupyter_server.request_notebook_command(request_obj(cell_index=cell_index))
+    final_request = request_obj(cell_index=cell_index)
+    J_LOGGER.info(f"Sending request with {final_request}")
+    jupyter_server.request_notebook_command(final_request)
     J_LOGGER.info("... Complete")
 
 
