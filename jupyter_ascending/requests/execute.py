@@ -1,12 +1,33 @@
 import argparse
+import re
 from functools import partial
 from pathlib import Path
+from typing import List
 
 from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.logger import J_LOGGER
 
-CELL_SEPARATOR = "# %%"
+CELL_SEPARATOR_PATTERNS = [
+    re.compile(r"#\s*%%"),
+    re.compile(r"#\s*\+\+"),
+]
+
+
+def _find_cell_number(lines: List[str], line_number: int) -> int:
+    cell_index = -1
+
+    for index, line in enumerate(lines):
+        if any(pat.match(line) for pat in CELL_SEPARATOR_PATTERNS):
+            J_LOGGER.debug(f"Found another new cell on line number: {index}")
+            cell_index += 1
+            J_LOGGER.debug(f"    New cell index {cell_index}")
+
+        # Found line number, quit
+        if index == int(line_number):
+            break
+
+    return cell_index
 
 
 def send(file_name: str, line_number: int, *args, **kwargs):
@@ -17,17 +38,10 @@ def send(file_name: str, line_number: int, *args, **kwargs):
 
     request_obj = partial(ExecuteRequest, file_name=file_name, contents="")
 
-    cell_index = -1
     with open(file_name, "r") as reader:
-        for index, line in enumerate(reader):
-            if line.startswith(CELL_SEPARATOR):
-                J_LOGGER.debug(f"Found another new cell on line number: {index}")
-                cell_index += 1
-                J_LOGGER.debug(f"    New cell index {cell_index}")
+        lines = reader.readlines()
 
-            # No need to loop through the whole file, just execute when we get there
-            if index == int(line_number):
-                break
+    cell_index = _find_cell_number(lines, line_number)
 
     final_request = request_obj(cell_index=cell_index)
     J_LOGGER.info(f"Sending request with {final_request}")
