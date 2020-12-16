@@ -8,7 +8,6 @@
 Sync Jupyter Notebooks from any editor
 
 ![Jupyter Ascending](./media/simple_jupyter_ascending.gif)
-
 ## Installation
 
 ```
@@ -33,6 +32,16 @@ Jupyter Ascending syncs the state between a python script and a Jupyter notebook
 At the moment, it syncs between python scripts that end with `.synced.py` and Jupyter notebooks with names that end with `.synced.ipynb`.
 
 To get a properly formatted `.synced.py` file, you should use `jupytext` to generate one. You can convert it to a Jupyter notebook with `jupytext` as well!
+
+## Getting started
+
+Jupyter ascending provides some scripts to help users. To get a pair of synced py and ipynb files, you could run the following:
+
+```
+$ python -m jupyter_ascending.scripts.make_pair --base examples/test
+```
+
+Which will create a pair of files: `exampes/test.synced.py` and `examples/text.synced.ipynb`. You can read the help for the command to find more information.
 
 ## Usage in Vim
 
