@@ -47,3 +47,40 @@ Which will create a pair of files: `examples/test.synced.py` and `examples/test.
 
 To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyter_ascending.vim)
 
+
+## Local development
+
+To do local development:
+
+```
+# Installs the extension, using symlinks
+$ jupyter nbextension install --py --sys-prefix --symlink jupyter_ascending
+
+# Enables them, so it auto loads
+$ jupyter nbextension enable jupyter_ascending --py --sys-prefix
+$ jupyter serverextension enable jupyter_ascending --sys-prefix --py
+```
+
+To check that they are enabled, do something like this:
+
+```
+$ jupyter nbextension list
+Known nbextensions:
+  config dir: /home/tj/.pyenv/versions/3.8.1/envs/general/etc/jupyter/nbconfig
+    notebook section
+      jupytext/index  enabled
+      - Validating: OK
+      jupyter-js-widgets/extension  enabled
+      - Validating: OK
+      jupyter_ascending/extension  enabled
+      - Validating: OK
+
+$ jupyter serverextension list
+config dir: /home/tj/.pyenv/versions/3.8.1/envs/general/etc/jupyter
+    jupytext  enabled
+    - Validating...
+      jupytext 1.8.0 OK
+    jupyter_ascending  enabled
+    - Validating...
+      jupyter_ascending 0.1.13 OK
+```
