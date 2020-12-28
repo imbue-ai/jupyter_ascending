@@ -39,13 +39,11 @@ notebook_server_methods = ServerMethods("JupyterNotebook Start", "JupyterNoteboo
 
 @J_LOGGER.catch
 def start_notebook_server_in_thread(
-    notebook_name: str, server, file_watcher_enabled: bool = False, status_widget=None
+    notebook_name: str, server, status_widget=None
 ):
     """
     Args:
         notebook_name: The name of the notebook you want to be syncing in this process.
-        file_watcher_enabled: If you're going to fire off events from a file watcher in your editor (like in PyCharm),
-            then you don't need to enable this. It will just use the same HTTP requests as normal
     """
 
     notebook_path = Path(notebook_name).absolute()
@@ -54,20 +52,6 @@ def start_notebook_server_in_thread(
         status_widget = widgets.Text()
         status_widget.style.description_width = "300px"
         display(status_widget)
-
-    if file_watcher_enabled:
-        assert False, "Currently unsupported."
-
-        from watchdog.observers import Observer
-        from jupyter_ascending.watchers.file_watcher import NotebookEventHandler
-
-        event_handler = NotebookEventHandler(str(notebook_path.absolute()), file_watcher_enabled)
-        file_observer = Observer()
-
-        abs_path = str(notebook_path.parent.absolute())
-        file_observer.schedule(event_handler, abs_path, recursive=False)
-        file_watcher_thread = threading.Thread(target=file_observer.start, args=tuple())
-        file_watcher_thread.start()
 
     # TODO: This might be a race condition if a bunch of these started at once...
     notebook_server_port = find_free_port()

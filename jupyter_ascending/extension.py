@@ -5,14 +5,11 @@ from jupyter_ascending.handlers import jupyter_notebook
 from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.utils import get_name_from_python
-from jupyter_ascending.widget import SyncMagic
 
 
 @J_LOGGER.catch
 def load_ipython_extension(ipython):
     J_LOGGER.info("Loading Ipython...")
-    # Add %start_notebook_syncing
-    ipython.register_magics(SyncMagic)
 
     # Start the server if it's the right name.
     notebook_name = get_name_from_python()

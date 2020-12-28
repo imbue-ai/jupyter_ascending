@@ -9,7 +9,6 @@ from jupyter_ascending._version import version_info
 from jupyter_ascending.extension import load_ipython_extension
 from jupyter_ascending.extension import load_jupyter_server_extension
 from jupyter_ascending.nbextension import _jupyter_nbextension_paths
-from jupyter_ascending.widget import SyncWidget
 
 
 def _jupyter_server_extension_paths():
@@ -19,7 +18,6 @@ def _jupyter_server_extension_paths():
 
 
 __all__ = [
-    "SyncWidget",
     "__version__",
     "_jupyter_nbextension_paths",
     "load_ipython_extension",

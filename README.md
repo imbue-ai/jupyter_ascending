@@ -41,7 +41,7 @@ Jupyter ascending provides some scripts to help users. To get a pair of synced p
 $ python -m jupyter_ascending.scripts.make_pair --base examples/test
 ```
 
-Which will create a pair of files: `exampes/test.synced.py` and `examples/text.synced.ipynb`. You can read the help for the command to find more information.
+Which will create a pair of files: `examples/test.synced.py` and `examples/test.synced.ipynb`. You can read the help for the command to find more information.
 
 ## Usage in Vim
 
