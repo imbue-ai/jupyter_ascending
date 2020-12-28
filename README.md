@@ -53,6 +53,9 @@ To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyt
 To do local development:
 
 ```
+# install dependencies
+$ poetry install
+
 # Installs the extension, using symlinks
 $ jupyter nbextension install --py --sys-prefix --symlink jupyter_ascending
 

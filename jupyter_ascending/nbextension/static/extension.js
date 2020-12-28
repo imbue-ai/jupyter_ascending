@@ -181,7 +181,6 @@ define(["base/js/namespace"], function (Jupyter) {
 
     // Export the required load_ipython_extension function
     return {
-        // TODO(josh): maybe this is the hook you can use to register for reloads.
         load_ipython_extension: function () {
             Jupyter.notebook.config.loaded
                 .then(
@@ -203,7 +202,7 @@ define(["base/js/namespace"], function (Jupyter) {
                     if (Jupyter.notebook.kernel) {
                         create_and_register_comm();
                     } else {
-                        Jupyter.notebook.events.on(
+                        Jupyter.notebook.events.one(
                             "kernel_ready.Kernel",
                             () => {
                                 console.log("We actually reloaded!");
@@ -211,6 +210,14 @@ define(["base/js/namespace"], function (Jupyter) {
                             }
                         );
                     }
+                    Jupyter.notebook.events.on(
+                        "kernel_ready.Kernel",
+                        () => {
+                            console.log("Registering notebook after kernel restart...");
+                            Jupyter.notebook.kernel.execute("import jupyter_ascending.extension; jupyter_ascending.extension.set_everything_up()");
+                        }
+                    );
+
                     console.log("... success!");
 
                     console.log("===================================");

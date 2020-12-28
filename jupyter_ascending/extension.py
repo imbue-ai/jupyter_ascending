@@ -9,6 +9,12 @@ from jupyter_ascending.utils import get_name_from_python
 
 @J_LOGGER.catch
 def load_ipython_extension(ipython):
+    set_everything_up()
+
+
+def set_everything_up():
+    # Note that this is also called from javascript after a kernel restart
+
     J_LOGGER.info("Loading Ipython...")
 
     # Start the server if it's the right name.
