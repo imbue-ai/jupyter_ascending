@@ -3,6 +3,8 @@ from pathlib import Path
 
 import jupytext
 
+from jupyter_ascending.logger import J_LOGGER
+
 _STARTER_CONTENTS = """# ---
 # jupyter:
 #   jupytext:
@@ -53,6 +55,7 @@ def create_new_file(base: str, force: bool):
 
 
 if __name__ == "__main__":
+    J_LOGGER.disable("__main__")
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="Base filename to add (do not include .py or .ipynb)", required=True)
     parser.add_argument("-f", "--force", help="Override existing files if passed.", default=False, action="store_true")

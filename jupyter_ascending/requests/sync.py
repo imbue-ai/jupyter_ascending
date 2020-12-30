@@ -35,6 +35,7 @@ def send(file_name: str, fmt: str = "py:percent", force_update: bool = False):
 
 
 if __name__ == "__main__":
+    J_LOGGER.disable("__main__")
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--filename", help="Filename to send")

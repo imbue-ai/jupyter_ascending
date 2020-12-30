@@ -75,12 +75,6 @@ def start_notebook_server_in_thread(
     return status_widget
 
 
-def status_func(comm, open_msg):
-    @comm.on_msg
-    def _recv(msg):
-        print(msg)
-        J_LOGGER.warning(msg)
-
 
 def dispatch_json_request(f):
     """

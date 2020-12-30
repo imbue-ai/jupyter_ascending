@@ -8,3 +8,6 @@ EXECUTE_HOST_URL = f"http://{EXECUTE_HOST_LOCATION[0]}:{EXECUTE_HOST_LOCATION[1]
 
 LOG_LEVEL = os.getenv("JUPYTER_ASCENDING_LOG_LEVEL", "INFO")
 SHOW_TO_STDOUT = os.getenv("JUPYTER_ASCENDING_SHOW_TO_STDOUT", False)
+# can either set this environment variable, or simply call logger.enable("jupyter_ascending") in order to see
+# future log messages (obviously will be missing any messages that happend before your call to enable)
+IS_LOGGING_ENABLED = os.getenv("JUPYTER_ASCENDING_IS_LOGGING_ENABLED", False)
