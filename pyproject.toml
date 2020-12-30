@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jupyter_ascending"
-version = "0.1.15"
+version = "0.1.16"
 description = ""
 authors = ["Your Name <you@example.com>"]
 

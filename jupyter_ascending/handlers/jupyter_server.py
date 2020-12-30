@@ -79,10 +79,12 @@ def get_server_for_notebook(notebook_str: str) -> Optional[str]:
 
     def get_score_for_name(registered_name: str) -> int:
         """
+        Note that it is matching on parts of a path
+
         Returns the consecutive count of matching parts of a path, from the end toward the start.
 
-        registered ['a', 'b', 'c']
-        notebook   ['x', 'b', 'c']
+        registered ['tmp', 'notebooks', 'myfile.py']
+        notebook   ['opt', 'notebooks', 'myfile.py']
          -> 2
 
         registered ['a', 'b', 'c']
@@ -92,18 +94,17 @@ def get_server_for_notebook(notebook_str: str) -> Optional[str]:
         """
         return len(get_matching_tail_tokens(notebook_path.parts, Path(registered_name).parts))
 
-    match_scores = list(filter(lambda x: x > 0, map(get_score_for_name, _REGISTERED_SERVERS)))
+    score_by_name = {x: get_score_for_name(x) for x in _REGISTERED_SERVERS.keys()}
+    max_score = max(score_by_name.values())
 
-    if not match_scores:
+    if max_score <= 0:
         raise UnableToFindNotebookException(f"Could not find server for notebook_str: {notebook_str}")
 
-    max_score = max(match_scores)
-
     # Only found one reasonable notebook.
-    best_scores = list(filter(lambda scored_name: scored_name[0] == max_score, zip(match_scores, _REGISTERED_SERVERS)))
+    best_scores = [k for k, v in score_by_name.items() if v == max_score]
 
     if len(best_scores) == 1:
-        notebook_port = _REGISTERED_SERVERS[best_scores.pop()[1]]
+        notebook_port = _REGISTERED_SERVERS[best_scores[0]]
 
         J_LOGGER.debug("Found server at port {}", notebook_port)
         return _make_url(notebook_port)
