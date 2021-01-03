@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "jupyter_ascending"
-version = "0.1.16"
+version = "0.1.17"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Josh Albrecht <joshalbrecht@gmail.com>", "TJ DeVries <devries.timothyj@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
