@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 
+from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.json_requests import SyncRequest
 from jupyter_ascending.logger import J_LOGGER
@@ -8,7 +9,7 @@ from jupyter_ascending.logger import J_LOGGER
 
 @J_LOGGER.catch
 def send(file_name: str):
-    if ".synced.py" not in file_name:
+    if f".{SYNC_EXTENSION}.py" not in file_name:
         return
 
     J_LOGGER.info(f"Syncing File: {file_name}...")

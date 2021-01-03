@@ -29,9 +29,9 @@ $ jupyter serverextension list
 
 Jupyter Ascending syncs the state between a python script and a Jupyter notebook.
 
-At the moment, it syncs between python scripts that end with `.synced.py` and Jupyter notebooks with names that end with `.synced.ipynb`.
+At the moment, it syncs between python scripts that end with `.sync.py` and Jupyter notebooks with names that end with `.sync.ipynb`.
 
-To get a properly formatted `.synced.py` file, you should use `jupytext` to generate one. You can convert it to a Jupyter notebook with `jupytext` as well!
+To get a properly formatted `.sync.py` file, you should use `jupytext` to generate one. You can convert it to a Jupyter notebook with `jupytext` as well!
 
 ## Getting started
 
@@ -41,7 +41,7 @@ Jupyter ascending provides some scripts to help users. To get a pair of synced p
 $ python -m jupyter_ascending.scripts.make_pair --base examples/test
 ```
 
-Which will create a pair of files: `examples/test.synced.py` and `examples/test.synced.ipynb`. You can read the help for the command to find more information.
+Which will create a pair of files: `examples/test.sync.py` and `examples/test.sync.ipynb`. You can read the help for the command to find more information.
 
 ## Usage in Vim
 

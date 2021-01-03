@@ -21,7 +21,7 @@ define(["base/js/namespace"], function (Jupyter) {
     }
 
     function is_synced_notebook() {
-        return get_notebook_name().includes(".synced.ipynb");
+        return get_notebook_name().includes(".sync.ipynb");
     }
 
     function get_cell_from_notebook(cell_number) {

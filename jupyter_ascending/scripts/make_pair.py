@@ -3,6 +3,7 @@ from pathlib import Path
 
 import jupytext
 
+from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.logger import J_LOGGER
 
 _STARTER_CONTENTS = """# ---
@@ -27,13 +28,13 @@ print("Hello, world!")
 
 def create_new_file(base: str, force: bool):
     assert not base.endswith(".py"), "base: Cannot end with '.py'"
-    assert not base.endswith(".synced.py"), "base: Cannot end with 'synced.py' -- we're adding that!"
+    assert not base.endswith(f".{SYNC_EXTENSION}.py"), f"base: Cannot end with '{SYNC_EXTENSION}.py' -- we're adding that!"
     assert not base.endswith(".ipynb"), "base: Cannot end with '.ipynb'"
-    assert not base.endswith(".synced.ipynb"), "base: Cannot end with '.ipynb' -- we're adding that!"
-    assert not base.endswith(".synced"), "we're going to add '.synced'"
+    assert not base.endswith(f".{SYNC_EXTENSION}.ipynb"), "base: Cannot end with '.ipynb' -- we're adding that!"
+    assert not base.endswith(f".{SYNC_EXTENSION}"), f"we're going to add '.{SYNC_EXTENSION}'"
 
-    py_path = base + ".synced.py"
-    ipynb_path = base + ".synced.ipynb"
+    py_path = base + f".{SYNC_EXTENSION}.py"
+    ipynb_path = base + f".{SYNC_EXTENSION}.ipynb"
 
     if not force and Path(py_path).exists():
         print(f"Path '{py_path}' already exists. Call with --force to override.")

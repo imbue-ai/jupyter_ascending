@@ -1,6 +1,7 @@
 import signal
 import time
 
+from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.handlers import jupyter_notebook
 from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.logger import J_LOGGER
@@ -21,7 +22,7 @@ def set_everything_up():
     notebook_name = get_name_from_python()
     J_LOGGER.info("IPYTHON: Loading {notebook}", notebook=notebook_name)
 
-    if ".synced.ipynb" not in notebook_name:
+    if f".{SYNC_EXTENSION}.ipynb" not in notebook_name:
         J_LOGGER.info("IPYTHON: Note loading {notebook} because name does not match", notebook=notebook_name)
         return
 

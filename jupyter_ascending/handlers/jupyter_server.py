@@ -13,6 +13,7 @@ from requests.exceptions import ConnectionError
 
 from jupyter_ascending._environment import EXECUTE_HOST_LOCATION
 from jupyter_ascending._environment import EXECUTE_HOST_URL
+from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.errors import UnableToFindNotebookException
 from jupyter_ascending.functional import get_matching_tail_tokens
 from jupyter_ascending.handlers import ServerMethods
@@ -72,7 +73,7 @@ def register_server(notebook_path: str, port_number: int) -> None:
 
 def get_server_for_notebook(notebook_str: str) -> Optional[str]:
     # Normalize to notebook path
-    notebook_str = notebook_str.replace(".synced.py", ".synced.ipynb")
+    notebook_str = notebook_str.replace(f".{SYNC_EXTENSION}.py", f".{SYNC_EXTENSION}.ipynb")
     J_LOGGER.debug("Finding server for notebook_str, script_path: {}", notebook_str)
 
     notebook_path = Path(notebook_str)
