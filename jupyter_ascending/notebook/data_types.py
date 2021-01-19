@@ -38,6 +38,9 @@ class JupyterCell:
     execution_count: Optional[int] = attr.ib(default=None)
     # metadata: Optional[Dict[str, Any]] = attr.ib(default=None, converter=frozen_dict)
 
+    # occurs in higher versions of nbformat
+    id: Optional[str] = attr.ib(default=None)
+
     @property
     def joined_source(self) -> str:
         return "".join(self.source)
