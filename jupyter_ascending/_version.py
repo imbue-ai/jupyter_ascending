@@ -5,5 +5,5 @@
 # Distributed under the terms of the Modified BSD License.
 
 # NOTE: Must keep in sync w/ pyproject.toml to publish
-version_info = (0, 1, 18)
+version_info = (0, 1, 19)
 __version__ = ".".join(map(str, version_info))
