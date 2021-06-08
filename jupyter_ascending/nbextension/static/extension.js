@@ -105,17 +105,26 @@ define(["base/js/namespace"], function (Jupyter) {
     //   // TODO: Focus the output so you can see all of it if it's long
     // }
 
+    function get_cells_without_outputs() {
+        let cells = Jupyter.notebook.get_cells();
+        let cells_cloned = JSON.parse(JSON.stringify(cells));
+        for (let cell of cells_cloned) {
+            cell.outputs = [];
+        }
+        return cells_cloned;
+    }
+
     function get_status(comm_obj) {
         comm_obj.send({
             command: "update_status",
-            status: Jupyter.notebook.get_cells(),
+            status: get_cells_without_outputs(),
         });
     }
 
     function start_sync_notebook(comm_obj, msg) {
         comm_obj.send({
             command: "merge_notebooks",
-            javascript_cells: Jupyter.notebook.get_cells(),
+            javascript_cells: get_cells_without_outputs(),
             new_notebook: msg.content.data.cells,
         });
     }
