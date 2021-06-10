@@ -31,8 +31,6 @@ Jupyter Ascending syncs the state between a python script and a Jupyter notebook
 
 At the moment, it syncs between python scripts that end with `.sync.py` and Jupyter notebooks with names that end with `.sync.ipynb`.
 
-To get a properly formatted `.sync.py` file, you should use `jupytext` to generate one. You can convert it to a Jupyter notebook with `jupytext` as well!
-
 ## Getting started
 
 Jupyter ascending provides some scripts to help users. To get a pair of synced py and ipynb files, you could run the following:
@@ -43,6 +41,27 @@ $ python -m jupyter_ascending.scripts.make_pair --base examples/test
 
 Which will create a pair of files: `examples/test.sync.py` and `examples/test.sync.ipynb`. You can read the help for the command to find more information.
 
+
+To manually test the ability to sync between a paired python file and a notebook, open up the notebook, and run this python command. You should see the contents of the python file appear in the notebook.
+
+`python -m jupyter_ascending.requests.sync --filename /full/path/to/file.sync.py`
+
+
+## Usage in PyCharm
+
+You'll want to set PyCharm up so that it runs `jupyter_ascending.requests.sync` every time you save a `.sync.py` file. This can be done with a File Watcher (preferences->file watcher).
+
+![File watcher config](./media/filewatcher.png)
+
+You'll need to make a custom file watcher scope: `file:*.sync.py`
+
+Then, if you want to set a keyboard shortcut in PyCharm for "run cell" in the notebook (handy if you have the editor and notebook windows side by side), you can do it by setting up an External Tool (preferences->external tools).
+
+![External tool config](./media/external_tool.png)
+
+You'll have to set up a keyboard shortcut for this external tool in the keyboard shortcuts menu.
+
+
 ## Usage in Vim
 
 To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyter_ascending.vim)
@@ -50,7 +69,7 @@ To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyt
 
 ## Local development
 
-To do local development:
+To do local development (only needed if you're modifying the jupyter-ascending code):
 
 ```
 # install dependencies
