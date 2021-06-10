@@ -41,11 +41,15 @@ $ python -m jupyter_ascending.scripts.make_pair --base examples/test
 
 Which will create a pair of files: `examples/test.sync.py` and `examples/test.sync.ipynb`. You can read the help for the command to find more information.
 
-Now, you should be able to 
+
+To manually test the ability to sync between a paired python file and a notebook, open up the notebook, and run this python command. You should see the contents of the python file appear in the notebook.
+
+`python -m jupyter_ascending.requests.sync --filename /full/path/to/file.sync.py`
+
 
 ## Usage in PyCharm
 
-You need to set PyCharm up so that it runs jupyter_ascending every time you save a file. This can be done with a File Watcher (preferences->file watcher).
+You'll want to set PyCharm up so that it runs `jupyter_ascending.requests.sync` every time you save a `.sync.py` file. This can be done with a File Watcher (preferences->file watcher).
 
 ![File watcher config](./media/filewatcher.png)
 
