@@ -27,7 +27,7 @@ class ServerMethods:
     """
     Wrapper to make some things a bit nicer around jsonrpcserver.methods.Methods
 
-    Basically just holds a dict of jsonrpcserver.methods.Methods, and wraps each with auto
+    Basically our own version of jsonrpcserver.methods.Methods, wrapping each method with auto
     logging and error catching so that you don't have to remember to do that.
     """
 
