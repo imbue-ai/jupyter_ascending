@@ -1,5 +1,6 @@
 import pytest
 
+from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.errors import UnableToFindNotebookException
 from jupyter_ascending.handlers.jupyter_server import _clear_registered_servers
 from jupyter_ascending.handlers.jupyter_server import _make_url
