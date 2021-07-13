@@ -1,3 +1,11 @@
+"""
+This file contains code for our server that runs alongside the Jupyter server.
+
+It receives commands from the client library in `requests` (potentially from a remote computer),
+and also receives messages from notebooks looking to register to receive Jupyter Ascending
+commands. Commands from the client library are passed along to the appropriate notebook which
+best matches the filepath of the `.sync.py` file.
+"""
 import threading
 from http.server import HTTPServer
 from pathlib import Path
@@ -37,16 +45,21 @@ def _make_url(notebook_port: int):
     return f"http://localhost:{notebook_port}"
 
 
+# These are the JSON-RPC messages that this server responds to.
+# We'll add more using decorators
 multiplexer_methods = ServerMethods("JupyterServer Start", "JupyterServer Close")
 
 
 @multiplexer_methods.add
 def register_notebook_server(notebook_path: str, port_number: int) -> None:
+    # TODO: why not just inline this?
     register_server(notebook_path=notebook_path, port_number=port_number)
 
 
 @multiplexer_methods.add
 def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[str, Any]) -> Optional[Dict]:
+    """Receives a command from the client library, picks the notebook that matches
+    the filepath, and forwards the command along to that notebook."""
     J_LOGGER.debug("Performing notebook request... ")
 
     try:
@@ -60,10 +73,13 @@ def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[s
     return None
 
 
+# This is the HTTP POST handler that dispatches the JSON-RPC messages to the appropriate function
 JupyterServerRequestHandler = generate_request_handler("JupyterServer", multiplexer_methods)
 
 
 def register_server(notebook_path: str, port_number: int) -> None:
+    """Receives a message from a notebook requesting to register itself
+    as available to receive Jupyter Ascending commands."""
     J_LOGGER.info("Registering notebook {notebook} on port {port}", notebook=notebook_path, port=port_number)
 
     _REGISTERED_SERVERS[notebook_path] = port_number
@@ -72,6 +88,7 @@ def register_server(notebook_path: str, port_number: int) -> None:
 
 
 def get_server_for_notebook(notebook_str: str) -> Optional[str]:
+    """Get the URL to the server running on the Jupyter notebook that best matches this filename."""
     # Normalize to notebook path
     notebook_str = notebook_str.replace(f".{SYNC_EXTENSION}.py", f".{SYNC_EXTENSION}.ipynb")
     J_LOGGER.debug("Finding server for notebook_str, script_path: {}", notebook_str)
@@ -96,6 +113,10 @@ def get_server_for_notebook(notebook_str: str) -> Optional[str]:
         return len(get_matching_tail_tokens(notebook_path.parts, Path(registered_name).parts))
 
     score_by_name = {x: get_score_for_name(x) for x in _REGISTERED_SERVERS.keys()}
+
+    if len(score_by_name) == 0:
+        raise UnableToFindNotebookException(f"No registered notebooks")
+
     max_score = max(score_by_name.values())
 
     if max_score <= 0:
@@ -114,6 +135,9 @@ def get_server_for_notebook(notebook_str: str) -> Optional[str]:
 
 
 def request_notebook_command(json_request: GenericJsonRequest):
+    """This is a command to be used by the client libraries to send a command to this server.
+
+    It calls unpacks the JsonRequest and calls `perform_notebook_request` defined above."""
     try:
         result = request(
             EXECUTE_HOST_URL,
@@ -136,6 +160,8 @@ def request_notebook_command(json_request: GenericJsonRequest):
 
 
 def start_server_in_thread():
+    """Run a server handling command requests from client libraries and registration requests from
+    notebooks."""
     try:
         server_executor = HTTPServer(EXECUTE_HOST_LOCATION, JupyterServerRequestHandler)
     except OSError:

@@ -27,7 +27,8 @@ class ServerMethods:
     """
     Wrapper to make some things a bit nicer around jsonrpcserver.methods.Methods
 
-    Adds auto logging and error catching so that you don't have to remember to do that.
+    Basically our own version of jsonrpcserver.methods.Methods, wrapping each method with auto
+    logging and error catching so that you don't have to remember to do that.
     """
 
     def __init__(self, start_msg: str, close_msg: str):
@@ -42,12 +43,20 @@ class ServerMethods:
 
 
 def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPRequestHandler:
+    """Build a handler to respond to HTTP POST requests containing JSON-RPC messages.
+
+    Will call jsonrpcserver.dispatch to dispatch the request to the appropriate handler.
+
+    TODO: why this weird construction vs a simple subclass?
+        - to be able to specify a custom class name, i think. but why do we need that?
+    """
     @J_LOGGER.catch
     def do_POST(self):
         # Process request
         request = self.rfile.read(int(self.headers["Content-Length"])).decode()
         J_LOGGER.info("{} processing request:\n\t\t{}", name, request)
 
+        # Dispatch the RPC request to the right function and get the function's response.
         response = dispatch(request, methods=methods)
 
         J_LOGGER.info("Got Response:\n\t\t{}", response)
