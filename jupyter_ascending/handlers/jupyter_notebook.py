@@ -34,6 +34,7 @@ from jupyter_ascending.notebook.merge import OpCodeAction
 from jupyter_ascending.notebook.merge import OpCodes
 from jupyter_ascending.notebook.merge import opcode_merge_cell_contents
 from jupyter_ascending.utils import find_free_port
+from jupyter_ascending.handlers.server_extension import register_notebook_server
 
 COMM_NAME = "AUTO_SYNC::notebook"
 
@@ -44,7 +45,7 @@ notebook_server_methods = ServerMethods("JupyterNotebook Start", "JupyterNoteboo
 
 @J_LOGGER.catch
 def start_notebook_server_in_thread(
-    notebook_name: str, server, status_widget=None
+    notebook_name: str, status_widget=None
 ):
     """
     Args:
@@ -68,7 +69,7 @@ def start_notebook_server_in_thread(
     J_LOGGER.info("IPYTHON: Registering notebook {}", notebook_path)
     request(
         EXECUTE_HOST_URL,
-        server.register_notebook_server.__name__,
+        register_notebook_server.__name__,
         # Params
         notebook_path=str(notebook_path),
         port_number=notebook_server_port,

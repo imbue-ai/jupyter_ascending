@@ -2,9 +2,9 @@ import argparse
 from pathlib import Path
 
 from jupyter_ascending._environment import SYNC_EXTENSION
-from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.json_requests import SyncRequest
 from jupyter_ascending.logger import J_LOGGER
+from jupyter_ascending.requests.client_lib import request_notebook_command
 
 
 @J_LOGGER.catch
@@ -19,7 +19,7 @@ def send(file_name: str):
         raw_result = reader.read()
 
     request_obj = SyncRequest(file_name=file_name, contents=raw_result)
-    jupyter_server.request_notebook_command(request_obj)
+    request_notebook_command(request_obj)
 
     J_LOGGER.info("... Complete")
 

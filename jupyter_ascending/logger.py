@@ -10,8 +10,12 @@ from jupyter_ascending._environment import IS_LOGGING_ENABLED
 
 __all__ = ["J_LOGGER"]
 
+log_file = os.path.join(tempfile.gettempdir(), "jupyter_ascending", "log.log")
+if IS_LOGGING_ENABLED:
+    print(f"Logging Jupyter Ascending logs to {log_file}")
+
 config = {
-    "handlers": [{"sink": os.path.join(tempfile.gettempdir(), "jupyter_ascending", "log.log"), "serialize": False, "level": LOG_LEVEL}],
+    "handlers": [{"sink": log_file, "serialize": False, "level": LOG_LEVEL}],
 }
 
 if SHOW_TO_STDOUT:
