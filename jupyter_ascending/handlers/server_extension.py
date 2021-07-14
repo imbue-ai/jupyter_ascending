@@ -1,21 +1,18 @@
-from notebook.utils import url_path_join  # type: ignore
-from notebook.base.handlers import IPythonHandler  # type: ignore
-
-from jsonrpcserver import dispatch
-from jsonrpcserver import method
-
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Optional
 
 from jsonrpcclient import request
+from jsonrpcserver import dispatch
+from jsonrpcserver import method
+from notebook.base.handlers import IPythonHandler  # type: ignore
+from notebook.utils import url_path_join  # type: ignore
 
-from jupyter_ascending.errors import UnableToFindNotebookException
-from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending._environment import SYNC_EXTENSION
-from pathlib import Path
+from jupyter_ascending.errors import UnableToFindNotebookException
 from jupyter_ascending.functional import get_matching_tail_tokens
-
+from jupyter_ascending.logger import J_LOGGER
 
 _REGISTERED_SERVERS: Dict[str, int] = {}
 
@@ -44,7 +41,7 @@ class JupyterAscendingHandler(IPythonHandler):
 
     def check_xsrf_cookie(self):
         """Disable XSRF cookie checking on this request type"""
-        pass
+
 
 def load_extension(nb_server_app):
     """
@@ -54,10 +51,9 @@ def load_extension(nb_server_app):
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
-    host_pattern = '.*$'
-    route_pattern = url_path_join(web_app.settings['base_url'], '/jupyter_ascending')
+    host_pattern = ".*$"
+    route_pattern = url_path_join(web_app.settings["base_url"], "/jupyter_ascending")
     web_app.add_handlers(host_pattern, [(route_pattern, JupyterAscendingHandler)])
-
 
 
 @method
@@ -86,6 +82,7 @@ def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[s
 
 def _make_url(notebook_port: int):
     return f"http://localhost:{notebook_port}"
+
 
 def get_server_for_notebook(notebook_str: str) -> Optional[str]:
     """Get the URL to the server running on the Jupyter notebook that best matches this filename."""

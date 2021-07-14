@@ -6,9 +6,9 @@ from jsonrpcclient.exceptions import ReceivedNon2xxResponseError
 from requests.exceptions import ConnectionError  # type: ignore
 
 from jupyter_ascending._environment import EXECUTE_HOST_URL
+from jupyter_ascending.handlers.server_extension import perform_notebook_request
 from jupyter_ascending.json_requests import JsonBaseRequest
 from jupyter_ascending.logger import J_LOGGER
-from jupyter_ascending.handlers.server_extension import perform_notebook_request
 
 GenericJsonRequest = TypeVar("GenericJsonRequest", bound=JsonBaseRequest)
 

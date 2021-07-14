@@ -22,6 +22,7 @@ from jsonrpcclient import request
 from jupyter_ascending._environment import EXECUTE_HOST_URL
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
+from jupyter_ascending.handlers.server_extension import register_notebook_server
 from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
@@ -34,7 +35,6 @@ from jupyter_ascending.notebook.merge import OpCodeAction
 from jupyter_ascending.notebook.merge import OpCodes
 from jupyter_ascending.notebook.merge import opcode_merge_cell_contents
 from jupyter_ascending.utils import find_free_port
-from jupyter_ascending.handlers.server_extension import register_notebook_server
 
 COMM_NAME = "AUTO_SYNC::notebook"
 
@@ -44,9 +44,7 @@ notebook_server_methods = ServerMethods("JupyterNotebook Start", "JupyterNoteboo
 
 
 @J_LOGGER.catch
-def start_notebook_server_in_thread(
-    notebook_name: str, status_widget=None
-):
+def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     """
     Args:
         notebook_name: The name of the notebook you want to be syncing in this process.
@@ -79,7 +77,6 @@ def start_notebook_server_in_thread(
     make_comm()
 
     return status_widget
-
 
 
 def dispatch_json_request(f):

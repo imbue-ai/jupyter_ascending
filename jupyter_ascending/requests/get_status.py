@@ -5,6 +5,7 @@ from jupyter_ascending.json_requests import GetStatusRequest
 from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.requests.client_lib import request_notebook_command
 
+
 def send(file_name: str):
     file_name = str(Path(file_name).absolute())
 
