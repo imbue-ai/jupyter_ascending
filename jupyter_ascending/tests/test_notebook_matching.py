@@ -2,10 +2,10 @@ import pytest
 
 from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.errors import UnableToFindNotebookException
-from jupyter_ascending.handlers.jupyter_server import _clear_registered_servers
-from jupyter_ascending.handlers.jupyter_server import _make_url
-from jupyter_ascending.handlers.jupyter_server import get_server_for_notebook
-from jupyter_ascending.handlers.jupyter_server import register_server
+from jupyter_ascending.handlers.server_extension import _clear_registered_servers
+from jupyter_ascending.handlers.server_extension import _make_url
+from jupyter_ascending.handlers.server_extension import get_server_for_notebook
+from jupyter_ascending.handlers.server_extension import register_notebook_server
 
 
 class TestGetSever:
@@ -14,7 +14,7 @@ class TestGetSever:
 
     def test_clear_registered_servers(self):
         notebook_name = f"hello.{SYNC_EXTENSION}.ipynb"
-        register_server(notebook_name, 1234)
+        register_notebook_server(notebook_name, 1234)
         assert get_server_for_notebook(notebook_name) is not None
 
         _clear_registered_servers()
@@ -25,7 +25,7 @@ class TestGetSever:
         notebook_name = f"hello.{SYNC_EXTENSION}.ipynb"
         notebook_port = 1234
 
-        register_server(notebook_name, notebook_port)
+        register_notebook_server(notebook_name, notebook_port)
         assert get_server_for_notebook(notebook_name) == _make_url(notebook_port)
 
     def test_stem_match(self):
@@ -34,7 +34,7 @@ class TestGetSever:
 
         notebook_port = 1234
 
-        register_server(true_notebook_name, notebook_port)
+        register_notebook_server(true_notebook_name, notebook_port)
         assert get_server_for_notebook(true_notebook_name) == _make_url(notebook_port)
         assert get_server_for_notebook(remote_notebook_name) == _make_url(notebook_port)
 
@@ -46,8 +46,8 @@ class TestGetSever:
         notebook_port = 1234
         do_not_pick_port = 4444
 
-        register_server(true_notebook_name, notebook_port)
-        register_server(do_not_pick_notebook, do_not_pick_port)
+        register_notebook_server(true_notebook_name, notebook_port)
+        register_notebook_server(do_not_pick_notebook, do_not_pick_port)
 
         assert get_server_for_notebook(true_notebook_name) == _make_url(notebook_port)
         assert get_server_for_notebook(remote_notebook_name) == _make_url(notebook_port)
@@ -61,8 +61,8 @@ class TestGetSever:
 
         current_notebook_name = f"/home/tj/git/notebook.{SYNC_EXTENSION}.ipynb"
 
-        register_server(foo_notebook_name, foo_port)
-        register_server(bar_notebook_name, bar_port)
+        register_notebook_server(foo_notebook_name, foo_port)
+        register_notebook_server(bar_notebook_name, bar_port)
 
         assert get_server_for_notebook(foo_notebook_name) == _make_url(foo_port)
         assert get_server_for_notebook(bar_notebook_name) == _make_url(bar_port)
@@ -75,7 +75,7 @@ class TestGetSever:
         loaded_notebook_name = f"/home/tj/notebook.{SYNC_EXTENSION}.ipynb"
         not_loaded_notebook_name = f"/home/tj/other.{SYNC_EXTENSION}.ipynb"
 
-        register_server(loaded_notebook_name, 1234)
+        register_notebook_server(loaded_notebook_name, 1234)
 
         with pytest.raises(UnableToFindNotebookException):
             get_server_for_notebook(not_loaded_notebook_name)
