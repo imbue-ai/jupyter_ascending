@@ -24,10 +24,6 @@ def _clear_registered_servers():
 
 
 class JupyterAscendingHandler(IPythonHandler):
-    # def get(self):
-    #     print("got get request!")
-    #     self.finish('Hello, world!')
-
     def post(self) -> None:
         """We receive commands as HTTP POST requests.
 
