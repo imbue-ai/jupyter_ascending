@@ -1,3 +1,8 @@
+"""
+This file contains code for the JSON-RPC server we run alongside each .sync.ipynb notebook.
+
+It receives messages from `jupyter_server.py` and takes the appropriate action in the notebook.
+"""
 import threading
 from http.server import HTTPServer
 from inspect import signature
@@ -17,6 +22,7 @@ from jsonrpcclient import request
 from jupyter_ascending._environment import EXECUTE_HOST_URL
 from jupyter_ascending.handlers import ServerMethods
 from jupyter_ascending.handlers import generate_request_handler
+from jupyter_ascending.handlers.server_extension import register_notebook_server
 from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
@@ -38,9 +44,7 @@ notebook_server_methods = ServerMethods("JupyterNotebook Start", "JupyterNoteboo
 
 
 @J_LOGGER.catch
-def start_notebook_server_in_thread(
-    notebook_name: str, server, status_widget=None
-):
+def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     """
     Args:
         notebook_name: The name of the notebook you want to be syncing in this process.
@@ -63,7 +67,7 @@ def start_notebook_server_in_thread(
     J_LOGGER.info("IPYTHON: Registering notebook {}", notebook_path)
     request(
         EXECUTE_HOST_URL,
-        server.register_notebook_server.__name__,
+        register_notebook_server.__name__,
         # Params
         notebook_path=str(notebook_path),
         port_number=notebook_server_port,
@@ -75,11 +79,10 @@ def start_notebook_server_in_thread(
     return status_widget
 
 
-
 def dispatch_json_request(f):
     """
+    A kinda weird decorator attempting to remove some boilerplate in the following funcs.
     Automatically dispatch a json request based on the request_type.
-    This means we don't have to repeat ourselves.
 
     Adds it to notebook_server_methods
     """
@@ -98,6 +101,7 @@ def dispatch_json_request(f):
 
 @dispatch_json_request
 def handle_execute_request(request_type: Type[ExecuteRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'execute cell'"""
     request = request_type(**data)
 
     comm = get_comm()
@@ -108,9 +112,10 @@ def handle_execute_request(request_type: Type[ExecuteRequest], data: dict) -> st
 
 @dispatch_json_request
 def handle_execute_all_request(request_type: Type[ExecuteAllRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'execute all cells'"""
     request = request_type(**data)
 
-    # TODO: Remind mysefyl why I don't need to say the filename here...
+    # TODO: Remind myself why I don't need to say the filename here...
     comm = get_comm()
     execute_all_cells(comm)
 
@@ -119,6 +124,7 @@ def handle_execute_all_request(request_type: Type[ExecuteAllRequest], data: dict
 
 @dispatch_json_request
 def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'sync'"""
     request = request_type(**data)
 
     comm = get_comm()
@@ -133,6 +139,7 @@ def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
 
 @dispatch_json_request
 def handle_focus_cell_request(request_type: Type[FocusCellRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'focus cell'"""
     request = request_type(**data)
 
     print(request)
@@ -141,6 +148,7 @@ def handle_focus_cell_request(request_type: Type[FocusCellRequest], data: dict) 
 
 @dispatch_json_request
 def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'get status'"""
     J_LOGGER.info("Attempting get_status")
 
     comm = get_comm()
@@ -154,7 +162,10 @@ def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) 
 NotebookKernelRequestHandler = generate_request_handler("NotebookKernel", notebook_server_methods)
 
 
-def make_comm() -> None:
+def make_comm():
+    """A comm is a Jupyter object for communicating between a notebook and kernel.
+
+    Set up this object with event handlers."""
     global _JupyterComm
 
     J_LOGGER.info("IPYTHON: Registering Comms")
@@ -196,6 +207,7 @@ def get_comm():
 def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
     # J_LOGGER.info(Javascript("Jupyter.notebook.get_cells()"))
     def _transform_jupytext_cells(jupytext_cells) -> List[Dict[str, Any]]:
+        """TODO: what does this do?"""
         return [
             {"index": i, "output": [], **{k: v for (k, v) in x.items() if k not in {"outputs", "metadata"}}}
             for i, x in enumerate(result["cells"])
@@ -207,6 +219,7 @@ def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
 
 
 def get_output_text(javascript_cell) -> Optional[str]:
+    """Get cell output or return None if no output?"""
     output_tuple = javascript_cell.get("outputs", tuple())
     if not output_tuple:
         return None

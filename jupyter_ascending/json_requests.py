@@ -1,3 +1,7 @@
+"""Defines messages and data payloads for the JSON-RPC client-server protocol
++used to send our custom messages to the Jupyter notebook.
+
+TODO: dataclass looks to be depreciated. Replace with attr.define"""
 from typing import Optional
 
 from attr import dataclass

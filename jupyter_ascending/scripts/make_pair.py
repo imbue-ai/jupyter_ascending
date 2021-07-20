@@ -1,3 +1,6 @@
+"""
+Make a pair of empty .sync.py and .sync.ipynb files.
+"""
 import argparse
 from pathlib import Path
 

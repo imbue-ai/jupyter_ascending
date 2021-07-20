@@ -143,3 +143,9 @@ config dir: /home/tj/.pyenv/versions/3.8.1/envs/general/etc/jupyter
     - Validating...
       jupyter_ascending 0.1.13 OK
 ```
+
+Run tests from the root directory of this repository using `python -m pytest .`.
+
+Format files with `pyfixfmt`. In a PyCharm file watcher, something like
+
+```python -m pyfixfmt --file-glob $FilePathRelativeToProjectRoot$ --verbose```
