@@ -175,6 +175,9 @@ define(["base/js/namespace"], function (Jupyter) {
                         case "status":
                             console.log("give em the status");
                             return;
+                        case "finish_merge":
+                            comm.send({command: 'merge_complete'});
+                            return;
                         default:
                             console.log("Got an unexpected message: ", msg);
                             return;

@@ -7,6 +7,7 @@ from typing import List
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.requests.client_lib import request_notebook_command
+from jupyter_ascending.requests.sync import send as sync_send
 
 CELL_SEPARATOR_PATTERNS = [
     re.compile(r"#\s*%%"),
@@ -58,4 +59,6 @@ if __name__ == "__main__":
 
     arguments = parser.parse_args()
 
+    # Sync code first
+    sync_send(arguments.filename)
     send(arguments.filename, arguments.linenumber)

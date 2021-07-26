@@ -108,9 +108,13 @@ On file save (only execute on files with extension `.sync.py`):
 
 Then you can map keyboard shortcuts to:
 
+TODO: suggest decent default shortcuts
+
 Run cell:
 
 `python jupyter_ascending.requests.execute --filename [file_path] --linenumber [line_number]`
+
+You'll also likely want to make sure the file gets saved + synced before running any execution commands.
 
 
 If you get this working in a new editor, we'd love if you would show us how you set it up!
