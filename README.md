@@ -47,6 +47,16 @@ To manually test the ability to sync between a paired python file and a notebook
 
 `python -m jupyter_ascending.requests.sync --filename /full/path/to/file.sync.py`
 
+Note that currently Jupyter Ascending expects the jupyter server to be running at `localhost:8888`.
+
+## Security Warning!!
+
+The jupyter-ascending client-server connection is currently completely unauthenticated, even if you have auth enabled on the Jupyter server. This means that, if your jupyter server port is open to the internet, someone could detect that you have jupyter-ascending running, then sync and run arbitrary code on your machine. That's bad!!
+
+For the moment, we recommend only running jupyter-ascending when you're using jupyter locally, or when your jupyter server isn't open to the public internet. For example, we run Jupyter on remote servers, but keep Jupyter accessible only to localhost. Then we use a secure SSH tunnel to do port-forwarding.
+
+Hopefully we can add authentication in the future - it's just rather tricky because there are various forms of auth accepted by Jupyter and not all of them are convenient to integrate into our clients (eg IDE integrations). We welcome contributions here!
+
 ## How it works
 
 - your editor calls the jupyter ascending client library with one of a few commands:
@@ -54,12 +64,13 @@ To manually test the ability to sync between a paired python file and a notebook
     - run a cell / run all cells / other commands that should be mapped to a keyboard shortcut
 - the client library assembles a HTTP POST request and sends it to the jupyter server
 - there is a jupyter server extension which accepts HTTP POST requests at `http://[notebook_url]:[notebook_port]/jupyter_ascending`.
+    - Currently `notebook_url:notebook_port` is hardcoded to `localhost:8888`. This should be improved in the future.
 - the server extension matches the request filename to the proper running notebooks and forwards the command along to the notebook plugin
 - a notebook plugin receives the command, and updates the contents of the notebook or executes the requested command.
 
 ## Working on a remote server
 
-Because of the client-server architecture, Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[notebook_url]:[notebook_port]/jupyter_ascending`, with default being `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the remote jupyter port into `localhost:8888`, but you can set up the networking however you like.
+Because of the client-server architecture, Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[notebook_url]:[notebook_port]/jupyter_ascending`, with (hardcoded) default being `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the remote jupyter port into `localhost:8888`, but you can set up the networking however you like.
 
 There's fuzzy-matching logic to match the locally edited file path with the remote notebook file path (eg if the two machines have the code in a different directory), so everything should just work!
 
