@@ -4,9 +4,9 @@ from functools import partial
 from pathlib import Path
 from typing import List
 
-from jupyter_ascending.handlers import jupyter_server
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.logger import J_LOGGER
+from jupyter_ascending.requests.client_lib import request_notebook_command
 
 CELL_SEPARATOR_PATTERNS = [
     re.compile(r"#\s*%%"),
@@ -45,7 +45,7 @@ def send(file_name: str, line_number: int, *args, **kwargs):
 
     final_request = request_obj(cell_index=cell_index)
     J_LOGGER.info(f"Sending request with {final_request}")
-    jupyter_server.request_notebook_command(final_request)
+    request_notebook_command(final_request)
     J_LOGGER.info("... Complete")
 
 

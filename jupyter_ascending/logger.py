@@ -4,14 +4,18 @@ import tempfile
 
 from loguru import logger
 
+from jupyter_ascending._environment import IS_LOGGING_ENABLED
 from jupyter_ascending._environment import LOG_LEVEL
 from jupyter_ascending._environment import SHOW_TO_STDOUT
-from jupyter_ascending._environment import IS_LOGGING_ENABLED
 
 __all__ = ["J_LOGGER"]
 
+log_file = os.path.join(tempfile.gettempdir(), "jupyter_ascending", "log.log")
+if IS_LOGGING_ENABLED:
+    print(f"Logging Jupyter Ascending logs to {log_file}")
+
 config = {
-    "handlers": [{"sink": os.path.join(tempfile.gettempdir(), "jupyter_ascending", "log.log"), "serialize": False, "level": LOG_LEVEL}],
+    "handlers": [{"sink": log_file, "serialize": False, "level": LOG_LEVEL}],
 }
 
 if SHOW_TO_STDOUT:
@@ -27,21 +31,27 @@ if not IS_LOGGING_ENABLED:
 
     # but we do need to ensure that warnings, etc are shown:
     old_warning_function = logger.warning
+
     def new_warning(message, *args, **kwargs):
         old_warning_function(message, *args, **kwargs)
         print(message.format(*args, **kwargs))
+
     logger.warning = new_warning
 
     old_error_function = logger.error
+
     def new_error(message, *args, **kwargs):
         old_error_function(message, *args, **kwargs)
         print(message.format(*args, **kwargs))
+
     logger.error = new_error
 
     old_critical_function = logger.critical
+
     def new_critical(message, *args, **kwargs):
         old_critical_function(message, *args, **kwargs)
         print(message.format(*args, **kwargs))
+
     logger.critical = new_critical
 
 # Just give a global constant to import for now
