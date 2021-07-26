@@ -4,6 +4,7 @@ from pathlib import Path
 from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.requests.client_lib import request_notebook_command
+from jupyter_ascending.requests.sync import send as sync_send
 
 
 def send(file_name: str):
@@ -24,4 +25,6 @@ if __name__ == "__main__":
 
     arguments = parser.parse_args()
 
+    # Sync code first
+    sync_send(arguments.filename)
     send(arguments.filename)
