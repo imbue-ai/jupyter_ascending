@@ -26,11 +26,9 @@ def request_notebook_command(json_request: GenericJsonRequest):
             data=attr.asdict(json_request),
         )
 
-        if not result.data.result:
-            return
-
-        if not result.data.result.get("success", True):
-            raise Exception(f"Failed to complete request. {result.data}")
+        if not result.data.ok:
+            J_LOGGER.error("Failed to complete request.")
+            J_LOGGER.error(result)
 
     except ConnectionError as e:
         J_LOGGER.error(f"Unable to connect to server. Perhaps notebook is not running? {e}")

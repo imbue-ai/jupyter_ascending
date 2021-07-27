@@ -8,9 +8,6 @@ from jupyter_ascending._environment import IS_LOGGING_ENABLED
 from jupyter_ascending._environment import LOG_LEVEL
 from jupyter_ascending._environment import SHOW_TO_STDOUT
 
-IS_LOGGING_ENABLED = True
-SHOW_TO_STDOUT = True
-
 __all__ = ["J_LOGGER"]
 
 log_file = os.path.join(tempfile.gettempdir(), "jupyter_ascending", "log.log")

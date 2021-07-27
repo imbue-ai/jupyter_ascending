@@ -158,5 +158,3 @@ dmypy.json
 
 # Vim
 *.swp
-
-test/

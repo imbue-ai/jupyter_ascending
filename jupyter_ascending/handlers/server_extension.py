@@ -1,4 +1,3 @@
-import threading
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -34,7 +33,6 @@ class JupyterAscendingHandler(IPythonHandler):
         or you'll get a deadlock in the notebook kernel thread as it processes
         this request. Thus the usage of `asyncio`.
         """
-        J_LOGGER.info(f"current server thread: {threading.get_ident()}")
         request = self.request.body.decode()
 
         response = await dispatch(request)
