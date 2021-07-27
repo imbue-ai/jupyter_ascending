@@ -3,7 +3,6 @@ from typing import TypeVar
 import attr
 from jsonrpcclient import request
 from jsonrpcclient.exceptions import ReceivedNon2xxResponseError
-from loguru import logger
 from requests.exceptions import ConnectionError  # type: ignore
 
 from jupyter_ascending._environment import EXECUTE_HOST_URL
@@ -11,6 +10,10 @@ from jupyter_ascending.handlers.server_extension import perform_notebook_request
 from jupyter_ascending.json_requests import JsonBaseRequest
 
 GenericJsonRequest = TypeVar("GenericJsonRequest", bound=JsonBaseRequest)
+
+
+class RequestFailure(Exception):
+    pass
 
 
 def request_notebook_command(json_request: GenericJsonRequest):
@@ -27,10 +30,14 @@ def request_notebook_command(json_request: GenericJsonRequest):
         )
 
         if not result.data.ok:
-            J_LOGGER.error("Failed to complete request.")
-            J_LOGGER.error(result)
+            raise RequestFailure(f"JSONRPC request returned as failure: {result}")
+
+        if not result.data.result["success"]:
+            raise RequestFailure(
+                f"Connection to server successful, but got error message from server: {result.data.result['error']}"
+            )
 
     except ConnectionError as e:
-        logger.error(f"Unable to connect to server. Perhaps notebook is not running? {e}")
+        raise RequestFailure(f"Unable to connect to server. Perhaps notebook is not running? {e}")
     except ReceivedNon2xxResponseError as e:
-        logger.error(f"Unable to process request. Perhaps something else is running on this port? {e}")
+        raise RequestFailure(f"Unable to process request. Perhaps something else is running on this port? {e}")
