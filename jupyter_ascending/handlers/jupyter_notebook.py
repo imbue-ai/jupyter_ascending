@@ -130,7 +130,6 @@ def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
     merge_complete = False
     request = request_type(**data)
 
-    logger.info("Entering lock")
     # We lock here because updating the notebook isn't threadsafe.
     # If we got two sync requests simultaneously without a lock,
     # bad things might happen (eg duplicated inserts/deletes).
@@ -139,7 +138,6 @@ def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
 
         result = jupytext.reads(request.contents, fmt="py:percent")
         update_cell_contents(comm, result)
-    logger.info("exited lock")
 
     return "Syncing all cells"
 

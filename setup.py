@@ -12,13 +12,9 @@ from os.path import join as pjoin
 from setuptools import setup
 
 from setupbase import HERE
-from setupbase import combine_commands
-from setupbase import create_cmdclass
 from setupbase import ensure_python
-from setupbase import ensure_targets
 from setupbase import find_packages
 from setupbase import get_version
-from setupbase import install_npm
 
 # The name of the project
 name = "jupyter_ascending"
@@ -83,6 +79,7 @@ setup_args = dict(
         'test': [
             'pytest>=3.6',
             'pytest-cov',
+            'pytest-asyncio',
             'nbval',
         ],
         'examples': [
