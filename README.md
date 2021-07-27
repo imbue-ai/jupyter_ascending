@@ -113,7 +113,7 @@ Run cell:
 
 `python jupyter_ascending.requests.execute --filename [file_path] --linenumber [line_number]`
 
-You'll also likely want to make sure the file gets saved + synced before running any execution commands.
+The execution commands (run cell / run all cells) will sync the file before running the code, so you just need to make sure that the file is saved in order to run the current version of the code in your editor.
 
 
 If you get this working in a new editor, we'd love if you would show us how you set it up!
