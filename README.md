@@ -108,7 +108,6 @@ On file save (only execute on files with extension `.sync.py`):
 
 Then you can map keyboard shortcuts to:
 
-TODO: suggest decent default shortcuts
 
 Run cell:
 
