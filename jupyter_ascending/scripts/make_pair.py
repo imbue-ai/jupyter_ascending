@@ -7,7 +7,6 @@ from pathlib import Path
 import jupytext
 
 from jupyter_ascending._environment import SYNC_EXTENSION
-from jupyter_ascending.logger import J_LOGGER
 
 _STARTER_CONTENTS = """# ---
 # jupyter:
@@ -31,7 +30,9 @@ print("Hello, world!")
 
 def create_new_file(base: str, force: bool):
     assert not base.endswith(".py"), "base: Cannot end with '.py'"
-    assert not base.endswith(f".{SYNC_EXTENSION}.py"), f"base: Cannot end with '{SYNC_EXTENSION}.py' -- we're adding that!"
+    assert not base.endswith(
+        f".{SYNC_EXTENSION}.py"
+    ), f"base: Cannot end with '{SYNC_EXTENSION}.py' -- we're adding that!"
     assert not base.endswith(".ipynb"), "base: Cannot end with '.ipynb'"
     assert not base.endswith(f".{SYNC_EXTENSION}.ipynb"), "base: Cannot end with '.ipynb' -- we're adding that!"
     assert not base.endswith(f".{SYNC_EXTENSION}"), f"we're going to add '.{SYNC_EXTENSION}'"
@@ -59,7 +60,6 @@ def create_new_file(base: str, force: bool):
 
 
 if __name__ == "__main__":
-    J_LOGGER.disable("__main__")
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="Base filename to add (do not include .py or .ipynb)", required=True)
     parser.add_argument("-f", "--force", help="Override existing files if passed.", default=False, action="store_true")

@@ -1,18 +1,20 @@
 import argparse
 from pathlib import Path
 
+from loguru import logger
+
 from jupyter_ascending._environment import SYNC_EXTENSION
 from jupyter_ascending.json_requests import SyncRequest
-from jupyter_ascending.logger import J_LOGGER
+from jupyter_ascending.logger import setup_logger
 from jupyter_ascending.requests.client_lib import request_notebook_command
 
 
-@J_LOGGER.catch
+@logger.catch
 def send(file_name: str):
     if f".{SYNC_EXTENSION}.py" not in file_name:
         return
 
-    J_LOGGER.info(f"Syncing File: {file_name}...")
+    logger.info(f"Syncing File: {file_name}...")
     file_name = str(Path(file_name).absolute())
 
     with open(file_name, "r") as reader:
@@ -21,12 +23,12 @@ def send(file_name: str):
     request_obj = SyncRequest(file_name=file_name, contents=raw_result)
     request_notebook_command(request_obj)
 
-    J_LOGGER.info("... Complete")
+    logger.info("... Complete")
 
 
 if __name__ == "__main__":
-    J_LOGGER.disable("__main__")
     parser = argparse.ArgumentParser()
+    setup_logger()
 
     parser.add_argument("--filename", help="Filename to send")
 

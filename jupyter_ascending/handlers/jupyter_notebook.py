@@ -19,6 +19,7 @@ import jupytext
 from IPython.display import display
 from ipykernel.comm import Comm
 from jsonrpcclient import request
+from loguru import logger
 
 from jupyter_ascending._environment import EXECUTE_HOST_URL
 from jupyter_ascending.handlers import ServerMethods
@@ -29,7 +30,6 @@ from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
 from jupyter_ascending.json_requests import GetStatusRequest
 from jupyter_ascending.json_requests import SyncRequest
-from jupyter_ascending.logger import J_LOGGER
 from jupyter_ascending.notebook.data_types import JupyterCell
 from jupyter_ascending.notebook.data_types import NotebookContents
 from jupyter_ascending.notebook.merge import OpCodeAction
@@ -46,7 +46,7 @@ merge_complete = False
 lock = threading.Lock()
 
 
-@J_LOGGER.catch
+@logger.catch
 def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     """
     Args:
@@ -67,7 +67,7 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     notebook_executor_thread = threading.Thread(target=notebook_executor.serve_forever, args=tuple())
     notebook_executor_thread.start()
 
-    J_LOGGER.info("IPYTHON: Registering notebook {}", notebook_path)
+    logger.info("IPYTHON: Registering notebook {}", notebook_path)
     request(
         EXECUTE_HOST_URL,
         register_notebook_server.__name__,
@@ -75,7 +75,7 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
         notebook_path=str(notebook_path),
         port_number=notebook_server_port,
     )
-    J_LOGGER.info("==> Success")
+    logger.info("==> Success")
 
     return status_widget
 
@@ -130,7 +130,7 @@ def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
     merge_complete = False
     request = request_type(**data)
 
-    J_LOGGER.info("Entering lock")
+    logger.info("Entering lock")
     # We lock here because updating the notebook isn't threadsafe.
     # If we got two sync requests simultaneously without a lock,
     # bad things might happen (eg duplicated inserts/deletes).
@@ -139,7 +139,7 @@ def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
 
         result = jupytext.reads(request.contents, fmt="py:percent")
         update_cell_contents(comm, result)
-    J_LOGGER.info("exited lock")
+    logger.info("exited lock")
 
     return "Syncing all cells"
 
@@ -156,12 +156,12 @@ def handle_focus_cell_request(request_type: Type[FocusCellRequest], data: dict) 
 @dispatch_json_request
 def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) -> str:
     """JSON-RPC request handler for 'get status'"""
-    J_LOGGER.info("Attempting get_status")
+    logger.info("Attempting get_status")
 
     comm = make_comm()
     comm.send({"command": "get_status"})
 
-    J_LOGGER.info("Sent get_status")
+    logger.info("Sent get_status")
 
     return f"Updating status"
 
@@ -175,7 +175,7 @@ def make_comm():
     Set up this object with event handlers."""
     global merge_complete
 
-    J_LOGGER.info("IPYTHON: Registering Comms")
+    logger.info("IPYTHON: Registering Comms")
 
     comm_target_name = COMM_NAME
 
@@ -188,26 +188,26 @@ def make_comm():
     def _recv(msg):
         global merge_complete
         if _get_command(msg) == "merge_notebooks":
-            J_LOGGER.info("GOT UPDATE STATUS")
+            logger.info("GOT UPDATE STATUS")
             merge_notebooks(jupyter_comm, msg["content"]["data"])
             return
 
         if _get_command(msg) == "merge_complete":
-            J_LOGGER.info("GOT MERGE COMPLETE")
+            logger.info("GOT MERGE COMPLETE")
             merge_complete = True
             return
 
-        J_LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        J_LOGGER.info(msg)
-        J_LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.info(msg)
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
-    J_LOGGER.info("==> Success")
+    logger.info("==> Success")
 
     return jupyter_comm
 
 
 def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
-    # J_LOGGER.info(Javascript("Jupyter.notebook.get_cells()"))
+    # logger.info(Javascript("Jupyter.notebook.get_cells()"))
     def _transform_jupytext_cells(jupytext_cells) -> List[Dict[str, Any]]:
         """TODO: what does this do?"""
         return [
@@ -224,7 +224,7 @@ def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
             return
         time.sleep(0.01)
     else:
-        J_LOGGER.warning("Timed out waiting for syncing to complete.")
+        logger.warning("Timed out waiting for syncing to complete.")
     # contents = NotebookContents(cells=result["cells"])
 
 
@@ -249,7 +249,7 @@ def get_output_text(javascript_cell) -> Optional[str]:
     return None
 
 
-@J_LOGGER.catch(reraise=True)
+@logger.catch(reraise=True)
 def merge_notebooks(comm: Comm, result: Dict[str, Any]) -> None:
     javascript_cells = result["javascript_cells"]
     current_notebook = NotebookContents(
@@ -268,14 +268,14 @@ def merge_notebooks(comm: Comm, result: Dict[str, Any]) -> None:
     new_notebook = NotebookContents(cells=[JupyterCell(**x) for x in result["new_notebook"]])
 
     opcodes = opcode_merge_cell_contents(current_notebook, new_notebook)
-    J_LOGGER.info("Performing Opcodes...")
-    J_LOGGER.info(opcodes)
+    logger.info("Performing Opcodes...")
+    logger.info(opcodes)
 
     net_shift = 0
     for op_action in opcodes:
         net_shift = perform_op_code(comm, op_action, current_notebook, new_notebook, net_shift)
 
-    J_LOGGER.info("sending finish_merge command")
+    logger.info("sending finish_merge command")
     comm.send({"command": "finish_merge"})
 
 
@@ -298,7 +298,7 @@ def perform_op_code(
         pass
 
     elif op_action.op_code == OpCodes.DELETE:
-        J_LOGGER.info(f"Performing Delete: {op_action}")
+        logger.info(f"Performing Delete: {op_action}")
 
         # Since deletion is a bit goofy for jupyter, so it has to be adjusted by net shift thus far.
         cells_to_delete = [x + net_shift for x in range(*op_action.current)]
@@ -307,7 +307,7 @@ def perform_op_code(
         net_shift = net_shift - len(cells_to_delete)
 
     elif op_action.op_code == OpCodes.INSERT:
-        J_LOGGER.info(f"Performing Insert: {op_action}")
+        logger.info(f"Performing Insert: {op_action}")
 
         cells_to_insert = list(range(*op_action.updated))
         for cell_number in cells_to_insert:
