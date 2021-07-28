@@ -111,7 +111,7 @@ To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyt
         "args": "Jupyter Ascending Run Cell"
       },
       {
-        "key": "cmd-s s",
+        "key": "alt+s",
         "command": "workbench.action.tasks.runTask",
         "args": "Jupyter Ascending Sync"
       }
