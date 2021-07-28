@@ -43,11 +43,13 @@ $ python -m jupyter_ascending.scripts.make_pair --base examples/test
 This will create a pair of files: `examples/test.sync.py` and `examples/test.sync.ipynb`.
 
 
-To manually test the ability to sync between a paired python file and a notebook, open up the notebook, and run this python command. You should see the contents of the python file appear in the notebook.
+To manually test the ability to sync between a paired python file and a notebook, open up the notebook, and run this python command. You should see the contents of the python file appear in the notebook:
 
 `python -m jupyter_ascending.requests.sync --filename /full/path/to/file.sync.py`
 
-Note that currently Jupyter Ascending expects the jupyter server to be running at `localhost:8888`.
+Note that currently Jupyter Ascending expects the jupyter server to be running at `localhost:8888`. If it's running elsewhere, you'll need to set the env variables `JUPYTER_ASCENDING_EXECUTE_HOST` and `JUPYTER_ASCENDING_EXECUTE_PORT` appropriately both where you use the client (ie in your editor) and where you start the server.
+
+By default the Jupyter server will search for a free port starting at 8888. If 8888 is unavailable and it selects eg 8889, Jupyter Ascending won't work - as it's expecting to connect to 8888. To force Jupyter to use a specific port, start your jupyter notebook with `JUPYTER_PORT=8888 JUPYTER_PORT_RETRIES=0 jupyter notebook` (or whatever port you want, setting also `JUPYTER_ASCENDING_EXECUTE_PORT` appropriately).
 
 ## Security Warning!!
 
@@ -63,14 +65,14 @@ Hopefully we can add authentication in the future - it's just rather tricky beca
     - sync the code to the notebook (typically on save)
     - run a cell / run all cells / other commands that should be mapped to a keyboard shortcut
 - the client library assembles a HTTP POST request and sends it to the jupyter server
-- there is a jupyter server extension which accepts HTTP POST requests at `http://[notebook_url]:[notebook_port]/jupyter_ascending`.
-    - Currently `notebook_url:notebook_port` is hardcoded to `localhost:8888`. This should be improved in the future.
+- there is a jupyter server extension which accepts HTTP POST requests at `http://[jupyter_server_url]:[jupyter_server_port]/jupyter_ascending`.
 - the server extension matches the request filename to the proper running notebooks and forwards the command along to the notebook plugin
 - a notebook plugin receives the command, and updates the contents of the notebook or executes the requested command.
+- the notebook plugin consists of two parts - one part executes within the python process of the notebook kernel, and the other executes in javascript in the notebook's browser window. the part in python launches a little webserver in a thread, which is how it receives messages the server extension. when the webserver thread starts up, it sends a message to the server extension to "register" itself so the server extension knows where to send commands for that notebook.
 
 ## Working on a remote server
 
-Because of the client-server architecture, Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[notebook_url]:[notebook_port]/jupyter_ascending`, with (hardcoded) default being `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the remote jupyter port into `localhost:8888`, but you can set up the networking however you like.
+Because of the client-server architecture, Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[jupyter_server_url]:[jupyter_server_port]/jupyter_ascending`, with the default set to `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the remote jupyter port into `localhost:8888`, but you can set up the networking however you like, and use the environment variables to tell the client where to look for the Jupyter server.
 
 There's fuzzy-matching logic to match the locally edited file path with the remote notebook file path (eg if the two machines have the code in a different directory), so everything should just work!
 
