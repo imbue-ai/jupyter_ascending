@@ -12,7 +12,6 @@ from jupyter_ascending.utils import get_name_from_python
 @logger.catch
 def load_ipython_extension(ipython):
     """This is the specially named function that Jupyter will call to load a notebook extension."""
-    setup_logger()
     set_everything_up()
 
 
@@ -20,6 +19,7 @@ def set_everything_up():
     # Note that this is also called from javascript after a kernel restart
 
     logger.info("Loading Ipython...")
+    setup_logger()
 
     # Start the server if it's the right name.
     notebook_name = get_name_from_python()
