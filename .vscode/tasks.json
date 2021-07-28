@@ -1,0 +1,79 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Jupyter Ascending Sync",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "jupyter_ascending.requests.sync",
+                "--filename",
+                "${file}",
+            ],
+            "presentation": {
+                // unfortunately "never" doesn't work with python extension installed..
+                // https://github.com/microsoft/vscode/issues/65179
+                "reveal": "never",
+                "panel": "dedicated",
+                "clear": true,
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": "autoDetect",
+                "pattern": [
+                    {
+                        "regexp": "^.*File \\\"([^\\\"]|.*)\\\", line (\\d+).*",
+                        "file": 1,
+                        "line": 2
+                    },
+                    {
+                        "regexp": "^.*raise.*$"
+                    },
+                    {
+                        "regexp": "^\\s*(.*)\\s*$",
+                        "message": 1
+                    }
+                ],
+            }
+        },
+        {
+            "label": "Jupyter Ascending Run Cell",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "jupyter_ascending.requests.execute",
+                "--filename",
+                "${file}",
+                "--linenumber",
+                "${lineNumber}",
+            ],
+            "presentation": {
+                // unfortunately "never" doesn't work with python extension installed..
+                // https://github.com/microsoft/vscode/issues/65179
+                "reveal": "never",
+                "panel": "dedicated",
+                "clear": true,
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": "autoDetect",
+                "pattern": [
+                    {
+                        "regexp": "^.*File \\\"([^\\\"]|.*)\\\", line (\\d+).*",
+                        "file": 1,
+                        "line": 2
+                    },
+                    {
+                        "regexp": "^.*raise.*$"
+                    },
+                    {
+                        "regexp": "^\\s*(.*)\\s*$",
+                        "message": 1
+                    }
+                ],
+            }
+        }
+    ]
+  }
