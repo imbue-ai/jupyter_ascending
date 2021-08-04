@@ -4,19 +4,18 @@ from typing import Callable
 
 from jsonrpcserver import dispatch
 from jsonrpcserver import methods
-
-from jupyter_ascending.logger import J_LOGGER
+from loguru import logger
 
 
 def _wrap_request(f: Callable, start_msg: str, close_msg: str):
     @wraps(f)
-    @J_LOGGER.catch
+    @logger.catch
     def wrapper(*args, **kwargs):
-        J_LOGGER.debug("{}: {}", start_msg, f.__name__)
+        logger.debug("{}: {}", start_msg, f.__name__)
 
         result = f(*args, **kwargs)
 
-        J_LOGGER.debug("{}: {}", close_msg, result)
+        logger.debug("{}: {}", close_msg, result)
 
         return result
 
@@ -50,16 +49,17 @@ def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPReque
     TODO: why this weird construction vs a simple subclass?
         - to be able to specify a custom class name, i think. but why do we need that?
     """
-    @J_LOGGER.catch
+
+    @logger.catch
     def do_POST(self):
         # Process request
         request = self.rfile.read(int(self.headers["Content-Length"])).decode()
-        J_LOGGER.info("{} processing request:\n\t\t{}", name, request)
+        logger.info("{} processing request:\n\t\t{}", name, request)
 
         # Dispatch the RPC request to the right function and get the function's response.
         response = dispatch(request, methods=methods)
 
-        J_LOGGER.info("Got Response:\n\t\t{}", response)
+        logger.info("Got Response:\n\t\t{}", response)
 
         # Return response
         self.send_response(response.http_status)
@@ -68,7 +68,7 @@ def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPReque
         self.wfile.write(str(response).encode())
 
     def log_message(self, format, *args):
-        J_LOGGER.debug(args)
+        logger.debug(args)
 
     return type(
         f"{name}RequestHandler",
