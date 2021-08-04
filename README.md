@@ -98,7 +98,7 @@ To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyt
 
 ## Usage in Visual Studio Code
 
-(this will only work if you have a project folder open - it won't work if you just have an individual file open)
+Note: this will only work if you have a project folder open - it won't work if you just have an individual file open.
 
 - Make sure you have the Python extension installed and have selected a python interpreter (from the command pallete (ctrl-shift-p) -> python interpreter) that has jupyter_ascending installed.
 - Create Tasks in `.vscode/tasks.json` following the example in this repo's `.vscode/tasks.json`. You'll probably want one task for "sync code to notebook" and another for "execute cell", as we have in the example. If you don't already have Tasks set up, you can just copy our example file into your project. Otherwise just add our tasks alongside your existing ones in that file.
