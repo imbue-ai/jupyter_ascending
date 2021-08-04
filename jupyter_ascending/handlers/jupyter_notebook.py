@@ -4,6 +4,7 @@ This file contains code for the JSON-RPC server we run alongside each .sync.ipyn
 It receives messages from `jupyter_server.py` and takes the appropriate action in the notebook.
 """
 import threading
+import time
 from http.server import HTTPServer
 from inspect import signature
 from pathlib import Path
@@ -38,9 +39,11 @@ from jupyter_ascending.utils import find_free_port
 
 COMM_NAME = "AUTO_SYNC::notebook"
 
-_JupyterComm = None
-
 notebook_server_methods = ServerMethods("JupyterNotebook Start", "JupyterNotebook Close")
+
+merge_complete = False
+
+lock = threading.Lock()
 
 
 @J_LOGGER.catch
@@ -74,8 +77,6 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     )
     J_LOGGER.info("==> Success")
 
-    make_comm()
-
     return status_widget
 
 
@@ -104,7 +105,7 @@ def handle_execute_request(request_type: Type[ExecuteRequest], data: dict) -> st
     """JSON-RPC request handler for 'execute cell'"""
     request = request_type(**data)
 
-    comm = get_comm()
+    comm = make_comm()
     execute_cell_contents(comm, request.cell_index)
 
     return f"Executing cell `{request.cell_index}`"
@@ -116,7 +117,7 @@ def handle_execute_all_request(request_type: Type[ExecuteAllRequest], data: dict
     request = request_type(**data)
 
     # TODO: Remind myself why I don't need to say the filename here...
-    comm = get_comm()
+    comm = make_comm()
     execute_all_cells(comm)
 
     return f"Executing all cells in {request.file_name}"
@@ -125,14 +126,18 @@ def handle_execute_all_request(request_type: Type[ExecuteAllRequest], data: dict
 @dispatch_json_request
 def handle_sync_request(request_type: Type[SyncRequest], data: dict) -> str:
     """JSON-RPC request handler for 'sync'"""
+    global merge_complete
+    merge_complete = False
     request = request_type(**data)
 
-    comm = get_comm()
+    # We lock here because updating the notebook isn't threadsafe.
+    # If we got two sync requests simultaneously without a lock,
+    # bad things might happen (eg duplicated inserts/deletes).
+    with lock:
+        comm = make_comm()
 
-    result = jupytext.reads(request.contents, fmt="py:percent")
-    # import ipdb
-    # ipdb.set_trace()
-    update_cell_contents(comm, result)
+        result = jupytext.reads(request.contents, fmt="py:percent")
+        update_cell_contents(comm, result)
 
     return "Syncing all cells"
 
@@ -151,7 +156,7 @@ def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) 
     """JSON-RPC request handler for 'get status'"""
     J_LOGGER.info("Attempting get_status")
 
-    comm = get_comm()
+    comm = make_comm()
     comm.send({"command": "get_status"})
 
     J_LOGGER.info("Sent get_status")
@@ -166,7 +171,7 @@ def make_comm():
     """A comm is a Jupyter object for communicating between a notebook and kernel.
 
     Set up this object with event handlers."""
-    global _JupyterComm
+    global merge_complete
 
     J_LOGGER.info("IPYTHON: Registering Comms")
 
@@ -179,29 +184,24 @@ def make_comm():
 
     @jupyter_comm.on_msg
     def _recv(msg):
+        global merge_complete
         if _get_command(msg) == "merge_notebooks":
             J_LOGGER.info("GOT UPDATE STATUS")
             merge_notebooks(jupyter_comm, msg["content"]["data"])
+            return
+
+        if _get_command(msg) == "merge_complete":
+            J_LOGGER.info("GOT MERGE COMPLETE")
+            merge_complete = True
             return
 
         J_LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         J_LOGGER.info(msg)
         J_LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
-    # store comm for access in this thread later
-    _JupyterComm = jupyter_comm
-
     J_LOGGER.info("==> Success")
 
-    return _JupyterComm
-
-
-def get_comm():
-    # global _JupyterComm
-
-    # assert _JupyterComm, "Uh, how did we get None..."
-    # return _JupyterComm
-    return make_comm()
+    return jupyter_comm
 
 
 def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
@@ -215,6 +215,14 @@ def update_cell_contents(comm: Comm, result: Dict[str, Any]) -> None:
 
     comm.send({"command": "start_sync_notebook", "cells": _transform_jupytext_cells(result["cells"])})
 
+    # Wait for the merge_complete flag to get set in the callback.
+    # This way we don't release the lock before syncing is done.
+    for i in range(500):
+        if merge_complete:
+            return
+        time.sleep(0.01)
+    else:
+        J_LOGGER.warning("Timed out waiting for syncing to complete.")
     # contents = NotebookContents(cells=result["cells"])
 
 
@@ -264,6 +272,9 @@ def merge_notebooks(comm: Comm, result: Dict[str, Any]) -> None:
     net_shift = 0
     for op_action in opcodes:
         net_shift = perform_op_code(comm, op_action, current_notebook, new_notebook, net_shift)
+
+    J_LOGGER.info("sending finish_merge command")
+    comm.send({"command": "finish_merge"})
 
 
 def perform_op_code(

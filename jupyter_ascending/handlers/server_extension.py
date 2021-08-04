@@ -3,8 +3,8 @@ from typing import Any
 from typing import Dict
 from typing import Optional
 
-from jsonrpcclient import request
-from jsonrpcserver import dispatch
+from jsonrpcclient.clients.tornado_client import TornadoClient
+from jsonrpcserver import async_dispatch as dispatch
 from jsonrpcserver import method
 from notebook.base.handlers import IPythonHandler  # type: ignore
 from notebook.utils import url_path_join  # type: ignore
@@ -24,16 +24,20 @@ def _clear_registered_servers():
 
 
 class JupyterAscendingHandler(IPythonHandler):
-    def post(self) -> None:
+    async def post(self) -> None:
         """We receive commands as HTTP POST requests.
 
-        TODO: might want to convert this to async in the future
-        (tornado and jsonrpcserver support asyncio)"""
+        NOTE: authentication is disabled on this endpoint!!!
+
+        It is critical that this doesn't block the main server thread,
+        or you'll get a deadlock in the notebook kernel thread as it processes
+        this request. Thus the usage of `asyncio`.
+        """
         request = self.request.body.decode()
-        response = dispatch(request)
+
+        response = await dispatch(request)
         J_LOGGER.info("Got Response:\n\t\t{}", response)
-        if response.wanted:
-            self.write(str(response))
+        self.write(str(response))
 
     def check_xsrf_cookie(self):
         """Disable XSRF cookie checking on this request type"""
@@ -53,7 +57,7 @@ def load_extension(nb_server_app):
 
 
 @method
-def register_notebook_server(notebook_path: str, port_number: int) -> None:
+async def register_notebook_server(notebook_path: str, port_number: int) -> None:
     J_LOGGER.info("Registering notebook {notebook} on port {port}", notebook=notebook_path, port=port_number)
 
     _REGISTERED_SERVERS[notebook_path] = port_number
@@ -62,7 +66,7 @@ def register_notebook_server(notebook_path: str, port_number: int) -> None:
 
 
 @method
-def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[str, Any]) -> Optional[Dict]:
+async def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[str, Any]) -> Optional[Dict]:
     """Receives a command from the client library, picks the notebook that matches
     the filepath, and forwards the command along to that notebook."""
     J_LOGGER.debug("Performing notebook request... ")
@@ -70,10 +74,15 @@ def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[s
     try:
         notebook_server = get_server_for_notebook(notebook_path)
     except UnableToFindNotebookException:
-        J_LOGGER.warning(f"Unabled to find {notebook_path} in {_REGISTERED_SERVERS}")
+        J_LOGGER.warning(f"Unable to find {notebook_path} in {_REGISTERED_SERVERS}")
         return {"success": False, "notebook_path": notebook_path}
 
-    request(notebook_server, command_name, data=data)
+    client = TornadoClient(notebook_server)
+    response = await client.request(command_name, data=data)
+    if not response.data.ok:
+        J_LOGGER.error("Got failed response from notebook:")
+        J_LOGGER.error(response)
+    return response.data.result
 
 
 def _make_url(notebook_port: int):
