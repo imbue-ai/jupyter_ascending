@@ -24,6 +24,11 @@ class ExecuteAllRequest(JsonBaseRequest):
 
 
 @dataclass
+class RestartRequest(JsonBaseRequest):
+    pass
+
+
+@dataclass
 class SyncRequest(JsonBaseRequest):
     contents: str
 

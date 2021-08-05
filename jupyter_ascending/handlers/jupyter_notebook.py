@@ -29,6 +29,7 @@ from jupyter_ascending.json_requests import ExecuteAllRequest
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.json_requests import FocusCellRequest
 from jupyter_ascending.json_requests import GetStatusRequest
+from jupyter_ascending.json_requests import RestartRequest
 from jupyter_ascending.json_requests import SyncRequest
 from jupyter_ascending.notebook.data_types import JupyterCell
 from jupyter_ascending.notebook.data_types import NotebookContents
@@ -162,6 +163,18 @@ def handle_get_status_request(request_type: Type[GetStatusRequest], data: dict) 
     logger.info("Sent get_status")
 
     return f"Updating status"
+
+
+@dispatch_json_request
+def handle_restart_request(request_type: Type[RestartRequest], data: dict) -> str:
+    """JSON-RPC request handler for 'restart'"""
+    request = request_type(**data)
+
+    comm = make_comm()
+    comm.send({"command": "restart_kernel"})
+    logger.info("Sent restart_kernel")
+
+    return f"Restarting kernel in {request.file_name}"
 
 
 NotebookKernelRequestHandler = generate_request_handler("NotebookKernel", notebook_server_methods)
