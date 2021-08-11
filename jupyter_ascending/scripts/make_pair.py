@@ -23,8 +23,6 @@ _STARTER_CONTENTS = """# ---
 # ---
 
 # %%
-print("Hello, world!")
-
 """
 
 

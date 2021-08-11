@@ -15,16 +15,13 @@ You can also sync your code to a remote Jupyter notebook. This lets you have all
 ## Installation
 
 ```
-$ pip install jupyter_ascending
-
-$ # It is possible you won't need to run the following commands on newer version of jupyter notebook,
-$ # but it's recommended that you do anyway, because installing extensions is hard.
-$ jupyter nbextension install --py --sys-prefix jupyter_ascending
-$ jupyter nbextension     enable jupyter_ascending --sys-prefix --py
-$ jupyter serverextension enable jupyter_ascending --sys-prefix --py
+$ pip install jupyter_ascending && \
+jupyter nbextension    install jupyter_ascending --sys-prefix --py && \
+jupyter nbextension     enable jupyter_ascending --sys-prefix --py && \
+jupyter serverextension enable jupyter_ascending --sys-prefix --py
 ```
 
-You can confirm it's installed by checking:
+You can confirm it's installed by checking for `jupyter_ascending` in:
 ```
 $ jupyter nbextension     list
 $ jupyter serverextension list
@@ -35,27 +32,36 @@ $ jupyter serverextension list
 
 ### Quickstart
 
-Jupyter Ascending syncs code between a pair of files, one with extension `.sync.py` and the other `.sync.ipynb`. You edit the `.sync.py` file in your favorite editor, and open the `.sync.ipynb` file in Jupyter.
+1) `python -m jupyter_ascending.scripts.make_pair --base example`
 
-To get this pair of files, run the following, where `--base` is the base filename to which `.sync.py` and `.sync.ipynb` will be added:
+   This makes a pair of synced py and ipynb files, `example.sync.py` and `example.sync.ipynb`.
 
-```
-$ python -m jupyter_ascending.scripts.make_pair --base examples/test
-```
 
-This will create the files `examples/test.sync.py` and `examples/test.sync.ipynb`.
+2) Start jupyter and open the notebook:
 
-Then set up one of the [editor integrations](#editor-integrations) documented below to auto-sync code and keyboard shortcuts to Jupyter.
+   `jupyter notebook example.sync.ipynb`
 
-Finally, open the `.sync.py` file in your editor, and the `.sync.ipynb` file in Jupyter, and test that code syncs on save and runs on your configured keyboard shortcut!
 
-### Usage Details
+3) Add some code to the `.sync.py` file, e.g.
 
-To manually test the ability to sync between a paired python file and a notebook, open up the notebook, and run this python command. You should see the contents of the python file appear in the notebook:
+   `echo 'print("Hello World!")' >> example.sync.py`
+   
 
-`python -m jupyter_ascending.requests.sync --filename /full/path/to/file.sync.py`
+4) Sync the code into the jupyter notebook:
 
-Note that currently Jupyter Ascending expects the jupyter server to be running at `localhost:8888`. If it's running elsewhere, you'll need to set the env variables `JUPYTER_ASCENDING_EXECUTE_HOST` and `JUPYTER_ASCENDING_EXECUTE_PORT` appropriately both where you use the client (ie in your editor) and where you start the server.
+   `python -m jupyter_ascending.requests.sync --filename example.sync.py`
+
+
+Set up one of the editor integrations to do all of this from within your favorite editor!
+- [Visual Studio Code](docs/VSCODE.md)
+- [PyCharm](docs/PYCHARM.md)
+- [Vim](https://github.com/untitled-ai/jupyter_ascending.vim)
+- [Other editors](docs/OTHER_EDITORS)
+
+
+### Working with multiple jupyter servers or alternate ports
+
+Currently Jupyter Ascending expects the jupyter server to be running at `localhost:8888`. If it's running elsewhere (eg due to having multiple jupyter notebooks open), you'll need to set the env variables `JUPYTER_ASCENDING_EXECUTE_HOST` and `JUPYTER_ASCENDING_EXECUTE_PORT` appropriately both where you use the client (ie in your editor) and where you start the server.
 
 By default the Jupyter server will search for a free port starting at 8888. If 8888 is unavailable and it selects eg 8889, Jupyter Ascending won't work - as it's expecting to connect to 8888. To force Jupyter to use a specific port, start your jupyter notebook with `JUPYTER_PORT=8888 JUPYTER_PORT_RETRIES=0 jupyter notebook` (or whatever port you want, setting also `JUPYTER_ASCENDING_EXECUTE_PORT` appropriately).
 
@@ -73,80 +79,6 @@ For the moment, we recommend only running jupyter-ascending when you're using ju
 
 Hopefully we can add proper authentication in the future. Contributions are welcome here!
 
-
-## Editor Integrations
-
-### PyCharm
-
-You'll want to set PyCharm up so that it runs `jupyter_ascending.requests.sync` every time you save a `.sync.py` file. This can be done with a File Watcher (preferences->file watcher).
-
-![File watcher config](./media/filewatcher.png)
-
-You'll need to make a custom file watcher scope: `file:*.sync.py`
-
-Then, if you want to set a keyboard shortcut in PyCharm for "run cell" in the notebook (handy if you have the editor and notebook windows side by side), you can do it by setting up an External Tool (preferences->external tools).
-
-![External tool config](./media/external_tool.png)
-
-The argument command that got cut off there is `jupyter_ascending.requests.execute --filename $FilePath$ --linenumber $LineNumber$`
-
-You'll have to set up a keyboard shortcut for this external tool in the keyboard shortcuts menu.
-
-
-### Vim
-
-To use in vim, see: [jupyter_ascending.vim](https://github.com/untitled-ai/jupyter_ascending.vim)
-
-### Visual Studio Code
-
-Note: this will only work if you have a project folder open - it won't work if you just have an individual file open.
-
-- Make sure you have the Python extension installed and have selected a python interpreter (from the command pallete (ctrl-shift-p) -> python interpreter) that has jupyter_ascending installed.
-- Create Tasks in `.vscode/tasks.json` following the example in this repo's `.vscode/tasks.json`. You'll probably want one task for "sync code to notebook" and another for "execute cell", as we have in the example. If you don't already have Tasks set up, you can just copy our example file into your project. Otherwise just add our tasks alongside your existing ones in that file.
-- Create shortcuts for the tasks in your `keybindings.json` file. You can access this file by opening the keyboard shortcuts pane (preferences -> keyboard shortcuts), and then hitting the little button in the upper right corner labeled Open Keyboard Shortcuts (JSON). Then add entries like the following, where `args` matches the Task's `label`:
-```json
-[
-    {
-        "key": "shift+enter",
-        "command": "workbench.action.tasks.runTask",
-        "args": "Jupyter Ascending Run Cell"
-      },
-      {
-        "key": "alt+s",
-        "command": "workbench.action.tasks.runTask",
-        "args": "Jupyter Ascending Sync"
-      }
-]
-```
-
-Then everything should work properly! If you see error messages, open the Terminal (View -> Terminal) and run the Task again to see the command output. It should also have the path to the full log file with more detailed logs.
-
-If you'd like to auto-sync on file save, you can try an extension like [Trigger Task on Save](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.triggertaskonsave), with a file filter to only sync `.sync.py` files.
-
-
-Things we'd like help improving:
-- The terminal always gets opened when running a task, even with "presentation":"reveal":"never" set in the Task. This seems to be due to an issue with the VSCode Python extension (see [here](https://github.com/microsoft/vscode/issues/65179)). Just making the window small is probably the best workaround for now.
-
-
-### Other editors
-
-To use Jupyter Ascending in a different editor, you just need to be able to set up a few hooks:
-
-On file save (only execute on files with extension `.sync.py`):
-
-`python -m jupyter_ascending.requests.sync --filename [file_path]`
-
-Then you can map keyboard shortcuts to:
-
-
-Run cell:
-
-`python jupyter_ascending.requests.execute --filename [file_path] --linenumber [line_number]`
-
-The execution commands (run cell / run all cells) will sync the file before running the code, so you just need to make sure that the file is saved in order to run the current version of the code in your editor.
-
-
-If you get this working in a new editor, we'd love if you would show us how you set it up!
 
 ## How it works
 
