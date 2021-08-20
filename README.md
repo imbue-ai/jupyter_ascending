@@ -7,9 +7,11 @@ Sync Jupyter Notebooks from any editor
 
 ## About
 
-Jupyter Ascending is a tool that enables you to edit Jupyter notebooks from your favorite code editor. You edit a normal python file, and Jupyter Ascending syncs the code into a Jupyter notebook, and forwards keyboard shortcuts. You can keep everything you like about your editor/IDE, like keybindings and autocomplete, while being able to get the interactivity and visualization that Jupyter brings.
+Jupyter Ascending lets you edit Jupyter notebooks from your favorite editor, then instantly sync and execute that code in the Jupyter notebook running in your browser.
 
-You can also sync your code to a remote Jupyter notebook. This lets you have all the power of a beefy dev-server with all the convenience of editing code locally.
+It's the best of both worlds--the autocomplete, keybindings, and refactoring tools you love in your favorite editor, plus the great visualization abilities of a Jupyter notebook.
+
+Combined with basic syncing of your code to a remote server, you can have all the power of a beefy dev-server with all the convenience of editing code locally.
 
 
 ## Installation
@@ -50,12 +52,16 @@ $ jupyter serverextension list
 4) Sync the code into the jupyter notebook:
 
    `python -m jupyter_ascending.requests.sync --filename example.sync.py`
+   
+5) Run that cell of code
+
+   `python -m jupyter_ascending.requests.execute --filename example.sync.py --line 16`
 
 
 Set up one of the editor integrations to do all of this from within your favorite editor!
+- [Vim](https://github.com/untitled-ai/jupyter_ascending.vim)
 - [Visual Studio Code](docs/VSCODE.md)
 - [PyCharm](docs/PYCHARM.md)
-- [Vim](https://github.com/untitled-ai/jupyter_ascending.vim)
 - [Other editors](docs/OTHER_EDITORS)
 
 
@@ -67,9 +73,18 @@ By default the Jupyter server will search for a free port starting at 8888. If 8
 
 ### Working on a remote server
 
-Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[jupyter_server_url]:[jupyter_server_port]/jupyter_ascending`, with the default set to `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the remote jupyter port into `localhost:8888`, but you can set up the networking however you like, and use the environment variables to tell the client where to look for the Jupyter server.
+Jupyter Ascending doesn't know or care if the editor and the jupyter server are on the same machine. The client is just sending requests to `http://[jupyter_server_url]:[jupyter_server_port]/jupyter_ascending`, with the default set to `http://localhost:8888/jupyter_ascending`. We typically use SSH to forward the local jupyter port into the remote server, but you can set up the networking however you like, and use the environment variables to tell the client where to look for the Jupyter server.
 
 There's fuzzy-matching logic to match the locally edited file path with the remote notebook file path (eg if the two machines have the code in a different directory), so everything should just work!
+
+Here's an example of how you could set this up:
+1) install jupyter-ascending on both the client and the server
+2) put a copy of your project code on both the client and the server
+2) start a jupyter notebook on the server, and open a `.sync.ipynb` notebook
+3) set up port forwarding, e.g. with something like this (forwards local port `8888` to the remote port `8888`)
+   
+   `ssh -L 8888:127.0.0.1:8888 user@remote_hostname`
+4) use Jupyter Ascending clients as normal on the corresponding `.sync.py` file
 
 ## Security Warning
 
