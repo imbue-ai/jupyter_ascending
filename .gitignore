@@ -5,8 +5,6 @@ examples/
 scratch/
 
 
-# TODO: We should publish these at some point... for another day.
-docs/
 
 # TODO: Publish this somewhere for pycharm
 plugins/
@@ -158,3 +156,5 @@ dmypy.json
 
 # Vim
 *.swp
+
+.DS_Store
