@@ -3,7 +3,7 @@
 
 Sync Jupyter Notebooks from any editor
 
-![Jupyter Ascending](./media/simple_jupyter_ascending.gif)
+![Jupyter Ascending](./media/demo.webm)
 
 ## About
 

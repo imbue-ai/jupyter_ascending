@@ -40,4 +40,6 @@ def request_notebook_command(json_request: GenericJsonRequest):
     except ConnectionError as e:
         raise RequestFailure(f"Unable to connect to server. Perhaps notebook is not running? {e}")
     except ReceivedNon2xxResponseError as e:
-        raise RequestFailure(f"Unable to process request. Perhaps something else is running on this port? {e}")
+        raise RequestFailure(
+            f"Unable to process request. Is jupyter-ascending installed in the server's python environment? Perhaps something else is running on this port? {e}"
+        )
