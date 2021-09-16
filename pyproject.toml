@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jupyter_ascending"
-version = "0.1.19"
+version = "0.1.22"
 description = ""
 authors = ["Josh Albrecht <joshalbrecht@gmail.com>", "TJ DeVries <devries.timothyj@gmail.com>"]
 
@@ -25,5 +25,4 @@ pyfixfmt = "^0.9.0"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
-
 
