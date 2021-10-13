@@ -106,7 +106,6 @@ Hopefully we can add proper authentication in the future. Contributions are welc
 - a notebook plugin receives the command, and updates the contents of the notebook or executes the requested command.
 - the notebook plugin consists of two parts - one part executes within the python process of the notebook kernel, and the other executes in javascript in the notebook's browser window. the part in python launches a little webserver in a thread, which is how it receives messages the server extension. when the webserver thread starts up, it sends a message to the server extension to "register" itself so the server extension knows where to send commands for that notebook.
 
-
 ## Local development
 
 To do local development (only needed if you're modifying the jupyter-ascending code):
@@ -114,6 +113,9 @@ To do local development (only needed if you're modifying the jupyter-ascending c
 ```
 # install dependencies
 $ poetry install
+
+# Activate the poetry env
+$ poetry shell
 
 # Installs the extension, using symlinks
 $ jupyter nbextension install --py --sys-prefix --symlink jupyter_ascending
