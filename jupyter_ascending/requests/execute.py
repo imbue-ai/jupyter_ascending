@@ -18,7 +18,16 @@ CELL_SEPARATOR_PATTERNS = [
 
 
 def _find_cell_number(lines: List[str], line_number: int) -> int:
-    cell_index = -1
+    # We need to split cells the same way that jupytext does so that our cell numbers line up.
+    # Unfortunately there's not an obvious way to just use the jupytext parser.
+
+    # The default case has a # %% on the first line. The first cell starts after this.
+    # A second case has no # %% before code begins. The first cell starts immediately.
+    # A third case has a single blank line before the # %%. The blank line is its own cell.
+    if any(pat.match(lines[0]) for pat in CELL_SEPARATOR_PATTERNS):
+        cell_index = -1
+    else:
+        cell_index = 0
 
     for index, line in enumerate(lines):
         if any(pat.match(line) for pat in CELL_SEPARATOR_PATTERNS):
