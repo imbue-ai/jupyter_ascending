@@ -154,3 +154,9 @@ Run tests from the root directory of this repository using `python -m pytest .`.
 Format files with `pyfixfmt`. In a PyCharm file watcher, something like
 
 ```python -m pyfixfmt --file-glob $FilePathRelativeToProjectRoot$ --verbose```
+
+Pushing a new version to PyPI:
+- Bump the version number in `pyproject.toml` and `_version.py`.
+- `poetry build`
+- `poetry publish`
+- `git tag VERSION` and `git push origin VERSION`
