@@ -160,3 +160,9 @@ Pushing a new version to PyPI:
 - `poetry build`
 - `poetry publish`
 - `git tag VERSION` and `git push origin VERSION`
+
+Updating dependencies: 
+- Dependency constraints are in `pyproject.toml`.
+  These are the constraints that will be enforced when distributing the package to end users.
+- These get locked down to specific versions of each package in `poetry.lock`, when you run `poetry lock` or `poetry install` for the first time. `poetry.lock` is only used by developers using `poetry install` - the goal is to have a consistent development environment for a all developers.
+- If you make a change to the dependencies in `pyproject.toml`, you'll want to update the lock file with `poetry lock`. To get only the minimal required changes, use `poetry lock --no-update`.
