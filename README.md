@@ -114,7 +114,7 @@ To do local development (only needed if you're modifying the jupyter-ascending c
 # Install poetry system-wide (not the python package!)
 # (https://python-poetry.org/docs/#installation)
 
-# install dependencies
+# install dependencies (will install from the lock file)
 $ poetry install
 
 # Activate the poetry env
