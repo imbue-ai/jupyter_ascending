@@ -14,7 +14,6 @@ from typing import List
 from typing import Optional
 from typing import Type
 
-import ipywidgets as widgets
 import jupytext
 from IPython.display import display
 from ipykernel.comm import Comm
@@ -56,11 +55,6 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
 
     notebook_path = Path(notebook_name).absolute()
 
-    if not status_widget:
-        status_widget = widgets.Text()
-        status_widget.style.description_width = "300px"
-        display(status_widget)
-
     # TODO: This might be a race condition if a bunch of these started at once...
     notebook_server_port = find_free_port()
 
@@ -77,8 +71,6 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
         port_number=notebook_server_port,
     )
     logger.info("==> Success")
-
-    return status_widget
 
 
 def dispatch_json_request(f):

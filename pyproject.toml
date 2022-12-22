@@ -7,13 +7,10 @@ authors = ["Josh Albrecht <joshalbrecht@gmail.com>", "TJ DeVries <devries.timoth
 
 [tool.poetry.dependencies]
 python = "^3.6"
-jupytext = "^1.3.4"
+jupytext = "^1.14.4"
 jsonrpcserver = {extras = ["requests"], version = "^4.1.2"}
 jsonrpcclient = {extras = ["requests"], version = "^3.3.5"}
-ipywidgets = "^7.5.1"
 loguru = ">=0.4.1"
-attrs = ">=19.0.0"
-toml = ">=0.10.0"
 edlib = "^1.3.8"
 
 [tool.poetry.dev-dependencies]
