@@ -111,6 +111,9 @@ Hopefully we can add proper authentication in the future. Contributions are welc
 To do local development (only needed if you're modifying the jupyter-ascending code):
 
 ```
+# Install poetry system-wide (not the python package!)
+# (https://python-poetry.org/docs/#installation)
+
 # install dependencies
 $ poetry install
 
