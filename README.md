@@ -63,7 +63,7 @@ Set up one of the editor integrations to do all of this from within your favorit
 - [Vim](https://github.com/untitled-ai/jupyter_ascending.vim)
 - [Visual Studio Code](docs/VSCODE.md)
 - [PyCharm](docs/PYCHARM.md)
-- [Other editors](docs/OTHER_EDITORS)
+- [Other editors](docs/OTHER_EDITORS.md)
 
 
 ### Working with multiple jupyter servers or alternate ports
