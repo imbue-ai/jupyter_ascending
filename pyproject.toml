@@ -6,7 +6,7 @@ description = ""
 authors = ["Josh Albrecht <joshalbrecht@gmail.com>", "TJ DeVries <devries.timothyj@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 jupytext = "^1.14.4"
 jsonrpcserver = {extras = ["requests"], version = "^4.1.2"}
 jsonrpcclient = {extras = ["requests"], version = "^3.3.5"}
@@ -17,6 +17,8 @@ edlib = "^1.3.8"
 python-language-server = {extras = ["all"], version = "^0.31.9"}
 pyls-mypy = "^0.1.8"
 pyfixfmt = "^0.9.0"
+pytest = ">=7.2.0"
+pytest-asyncio = ">=0.20.3"
 
 [tool.poetry.scripts]
 
