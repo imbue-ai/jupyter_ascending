@@ -18,9 +18,9 @@ Combined with basic syncing of your code to a remote server, you can have all th
 
 ```
 $ pip install jupyter_ascending && \
-jupyter nbextension    install jupyter_ascending --sys-prefix --py && \
-jupyter nbextension     enable jupyter_ascending --sys-prefix --py && \
-jupyter serverextension enable jupyter_ascending --sys-prefix --py
+python -m jupyter nbextension    install jupyter_ascending --sys-prefix --py && \
+python -m jupyter nbextension     enable jupyter_ascending --sys-prefix --py && \
+python -m jupyter serverextension enable jupyter_ascending --sys-prefix --py
 ```
 
 You can confirm it's installed by checking for `jupyter_ascending` in:
@@ -28,6 +28,7 @@ You can confirm it's installed by checking for `jupyter_ascending` in:
 $ jupyter nbextension     list
 $ jupyter serverextension list
 ```
+
 
 
 ## Usage
