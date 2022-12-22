@@ -1,48 +1,54 @@
 import argparse
-import re
 from functools import partial
 from pathlib import Path
 from typing import List
 
 from loguru import logger
+import jupytext
 
 from jupyter_ascending.json_requests import ExecuteRequest
 from jupyter_ascending.logger import setup_logger
 from jupyter_ascending.requests.client_lib import request_notebook_command
 from jupyter_ascending.requests.sync import send as sync_send
 
-CELL_SEPARATOR_PATTERNS = [
-    re.compile(r"#\s*%%"),
-    re.compile(r"#\s*\+\+"),
-]
-
 
 def _find_cell_number(lines: List[str], line_number: int) -> int:
-    # We need to split cells the same way that jupytext does so that our cell numbers line up.
-    # Unfortunately there's not an obvious way to just use the jupytext parser.
+    """Implementation closely copied from jupytext.
 
-    # The default case has a # %% on the first line. The first cell starts after this.
-    # A second case has no # %% before code begins. The first cell starts immediately.
-    # A third case has a single blank line before the # %%. The blank line is its own cell.
-    if any(pat.match(lines[0]) for pat in CELL_SEPARATOR_PATTERNS):
-        cell_index = -1
-    else:
-        cell_index = 0
+    See https://github.com/mwouts/jupytext/blob/main/jupytext/jupytext.py#L138
+    """
+    text = "\n".join(lines)
+    conv = jupytext.jupytext.TextNotebookConverter(
+        jupytext.formats.divine_format(text), None
+    )
+    (metadata, _, _, pos,) = jupytext.header.header_to_metadata_and_cell(
+        lines,
+        conv.implementation.header_prefix,
+        conv.implementation.extension,
+        conv.fmt.get(
+            "root_level_metadata_as_raw_cell",
+            conv.config.root_level_metadata_as_raw_cell
+            if conv.config is not None
+            else True,
+        ),
+    )
+    conv.update_fmt_with_notebook_options(metadata, read=True)
+    default_language = jupytext.languages.default_language_from_metadata_and_ext(
+        metadata, conv.implementation.extension
+    )
 
-    for index, line in enumerate(lines):
-        if any(pat.match(line) for pat in CELL_SEPARATOR_PATTERNS):
-            logger.debug(f"Found another new cell on line number: {index}")
-            cell_index += 1
-            logger.debug(f"    New cell index {cell_index}")
-
-        # Found line number, quit
-        if index == int(line_number):
-            break
-
-    return cell_index
+    lines = lines[pos:]
+    num_lines_read, cell_number = pos, 0
+    reader = conv.implementation.cell_reader_class(conv.fmt, default_language)
+    while lines and num_lines_read < line_number:
+        _, pos = reader.read(lines)
+        num_lines_read += pos
+        cell_number += 1
+        lines = lines[pos:]
+    return max(0, cell_number - 1)
 
 
-def send(file_name: str, line_number: int, *args, **kwargs):
+def send(file_name: str, line_number: int):
     logger.debug("Starting execute request")
 
     # Always pass absolute path
@@ -50,7 +56,7 @@ def send(file_name: str, line_number: int, *args, **kwargs):
 
     request_obj = partial(ExecuteRequest, file_name=file_name, contents="")
 
-    with open(file_name, "r") as reader:
+    with open(file_name, "r", encoding="utf8") as reader:
         lines = reader.readlines()
 
     cell_index = _find_cell_number(lines, line_number)
@@ -66,7 +72,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--filename", help="Filename to send")
-    parser.add_argument("--linenumber", help="Line number that the cursor is currently on")
+    parser.add_argument(
+        "--linenumber", type=int, help="Line number that the cursor is currently on"
+    )
 
     arguments = parser.parse_args()
 
