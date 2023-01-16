@@ -29,7 +29,7 @@ $ jupyter nbextension     list
 $ jupyter serverextension list
 ```
 
-
+If your jupyter setup includes multiple python kernels that you'd like to use with jupyter ascending, you'll need to complete this setup in each of those python environments separately.
 
 ## Usage
 
