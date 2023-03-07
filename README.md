@@ -101,11 +101,11 @@ Hopefully we can add proper authentication in the future. Contributions are welc
 - your editor calls the jupyter ascending client library with one of a few commands:
   - sync the code to the notebook (typically on save)
   - run a cell / run all cells / other commands that should be mapped to a keyboard shortcut
-- the client library assembles a HTTP POST request and sends it to the jupyter server
+- the client library assembles an HTTP POST request and sends it to the jupyter server
 - there is a jupyter server extension which accepts HTTP POST requests at `http://[jupyter_server_url]:[jupyter_server_port]/jupyter_ascending`.
 - the server extension matches the request filename to the proper running notebooks and forwards the command along to the notebook plugin
 - a notebook plugin receives the command, and updates the contents of the notebook or executes the requested command.
-- the notebook plugin consists of two parts - one part executes within the python process of the notebook kernel, and the other executes in javascript in the notebook's browser window. the part in python launches a little webserver in a thread, which is how it receives messages the server extension. when the webserver thread starts up, it sends a message to the server extension to "register" itself so the server extension knows where to send commands for that notebook.
+- the notebook plugin consists of two parts - one part executes within the python process of the notebook kernel, and the other executes in javascript in the notebook's browser window. The part in python launches a little webserver in a thread, which is how it receives messages to the server extension. When the webserver thread starts up, it sends a message to the server extension to "register" itself so the server extension knows where to send commands for that notebook.
 
 ## Local development
 
@@ -168,5 +168,5 @@ Pushing a new version to PyPI:
 Updating dependencies: 
 - Dependency constraints are in `pyproject.toml`.
   These are the constraints that will be enforced when distributing the package to end users.
-- These get locked down to specific versions of each package in `poetry.lock`, when you run `poetry lock` or `poetry install` for the first time. `poetry.lock` is only used by developers using `poetry install` - the goal is to have a consistent development environment for a all developers.
+- These get locked down to specific versions of each package in `poetry.lock`, when you run `poetry lock` or `poetry install` for the first time. `poetry.lock` is only used by developers using `poetry install` - the goal is to have a consistent development environment for all developers.
 - If you make a change to the dependencies in `pyproject.toml`, you'll want to update the lock file with `poetry lock`. To get only the minimal required changes, use `poetry lock --no-update`.
