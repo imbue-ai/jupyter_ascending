@@ -31,6 +31,11 @@ $ jupyter serverextension list
 
 If your jupyter setup includes multiple python kernels that you'd like to use with jupyter ascending, you'll need to complete this setup in each of those python environments separately.
 
+Most likely, you would need to create kernels (eg `jasc_env`) for each of those environments:
+```
+$ python -m ipykernel install --user --name jasc_env --display-name "jasc_env"
+```
+
 ## Usage
 
 ### Quickstart
@@ -42,19 +47,21 @@ If your jupyter setup includes multiple python kernels that you'd like to use wi
 
 2) Start jupyter and open the notebook:
 
-   `jupyter notebook example.sync.ipynb`
+   `python -m jupyter notebook example.sync.ipynb`
+   
+3) If you used an environment, make sure to switch your kernel that correspond to that environment (eg `jasc_env`) in your Jupyter
 
 
-3) Add some code to the `.sync.py` file, e.g.
+4) Add some code to the `.sync.py` file, e.g.
 
    `echo 'print("Hello World!")' >> example.sync.py`
    
 
-4) Sync the code into the jupyter notebook:
+5) Sync the code into the jupyter notebook:
 
    `python -m jupyter_ascending.requests.sync --filename example.sync.py`
    
-5) Run that cell of code
+6) Run that cell of code
 
    `python -m jupyter_ascending.requests.execute --filename example.sync.py --line 16`
 
