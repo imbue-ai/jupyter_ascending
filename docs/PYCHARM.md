@@ -5,7 +5,7 @@ You'll want to set PyCharm up so that it runs `jupyter_ascending.requests.sync` 
 ![File watcher config](../media/filewatcher.png)
 
 For easy copying:
-- Program: `PyInterpreterDirectory$/python`
+- Program: `$PyInterpreterDirectory$/python`
 - Arguments: `-m jupyter_ascending.requests.sync --filename $FilePath$`
 
 You'll need to make a custom file watcher scope: `file:*.sync.py`
@@ -16,8 +16,8 @@ Then, if you want to set a keyboard shortcut in PyCharm for "run cell" in the no
 
 For easy copying:
 
-- Program: `PyInterpreterDirectory$/python`
-- Arguments: `jupyter_ascending.requests.execute --filename $FilePath$ --linenumber $LineNumber$`
+- Program: `$PyInterpreterDirectory$/python`
+- Arguments: `-m jupyter_ascending.requests.execute --filename $FilePath$ --linenumber $LineNumber$`
 - Working Directory: `$ProjectFileDir$`
 
 
