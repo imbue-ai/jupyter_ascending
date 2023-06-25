@@ -3,9 +3,15 @@ from typing import Any
 from typing import Dict
 from typing import Optional
 
-from jsonrpcclient.clients.tornado_client import TornadoClient
+from aiohttp import ClientSession
+from jsonrpcclient import Ok
+from jsonrpcclient import parse
+from jsonrpcclient import request
 from jsonrpcserver import async_dispatch as dispatch
 from jsonrpcserver import method
+from jsonrpcserver import Error
+from jsonrpcserver import Result
+from jsonrpcserver import Success
 from loguru import logger
 from notebook.base.handlers import IPythonHandler  # type: ignore
 from notebook.utils import url_path_join  # type: ignore
@@ -56,35 +62,42 @@ def load_extension(nb_server_app):
 
 
 @method
-async def register_notebook_server(notebook_path: str, port_number: int) -> None:
+async def register_notebook_server(notebook_path: str, port_number: int) -> Result:
     logger.info("Registering notebook {notebook} on port {port}", notebook=notebook_path, port=port_number)
 
     _REGISTERED_SERVERS[notebook_path] = port_number
 
     logger.debug("Updated notebook mappings: {}", _REGISTERED_SERVERS)
+    return Success()
 
 
 @method
-async def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[str, Any]) -> Optional[Dict]:
+async def perform_notebook_request(notebook_path: str, command_name: str, data: Dict[str, Any]) -> Result:
     """Receives a command from the client library, picks the notebook that matches
     the filepath, and forwards the command along to that notebook."""
     logger.debug("Performing notebook request... ")
 
     try:
         notebook_server = get_server_for_notebook(notebook_path)
-    except UnableToFindNotebookException:
-        message = f"""Unable to find a paired notebook for {notebook_path} in registered notebooks: {_REGISTERED_SERVERS}.
-Either a properly named notebook (ending in .sync.ipynb) is not running, or it didn't register properly for some reason."""
-        logger.warning(message)
-        return {"success": False, "error": message}
+    except UnableToFindNotebookException as e:
+        message = f"""\
+Unable to find a paired notebook for {notebook_path} in registered notebooks: {_REGISTERED_SERVERS}.
+Either a properly named notebook (ending in .sync.ipynb) is not running, or it didn't register properly for some reason.
 
-    client = TornadoClient(notebook_server)
-    response = await client.request(command_name, data=data)
-    if not response.data.ok:
+Exception details:
+{e}"""
+        logger.warning(message)
+        return Error(1, message)
+
+    async with ClientSession() as session:
+        json = request(command_name, params=dict(data=data))
+        async with session.post(notebook_server, json=json) as response:
+            response = parse(await response.json())
+    if not isinstance(response, Ok):
         message = "Got failed response from notebook: {response}"
         logger.error(message)
-        return {"success": False, "error": message}
-    return {"success": True}
+        return Error(1, message)
+    return Success()
 
 
 def _make_url(notebook_port: int):

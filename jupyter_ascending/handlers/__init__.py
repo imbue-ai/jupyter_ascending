@@ -40,6 +40,9 @@ class ServerMethods:
 
         return _wrap_request(f, self.start_msg, self.close_msg)
 
+    def __getitem__(self, method_name: str) -> Callable:
+        return self.items[method_name]
+
 
 def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPRequestHandler:
     """Build a handler to respond to HTTP POST requests containing JSON-RPC messages.
@@ -62,7 +65,7 @@ def generate_request_handler(name: str, methods: ServerMethods) -> BaseHTTPReque
         logger.info("Got Response:\n\t\t{}", response)
 
         # Return response
-        self.send_response(response.http_status)
+        self.send_response(200 if response else 204)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(str(response).encode())

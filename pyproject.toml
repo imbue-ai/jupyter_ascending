@@ -1,17 +1,19 @@
 [tool.poetry]
 name = "jupyter_ascending"
 # Make sure to also update _version.py when doing version bump.
-version = "0.1.24"
+version = "0.1.25"
 description = ""
 authors = ["Josh Albrecht <joshalbrecht@gmail.com>", "TJ DeVries <devries.timothyj@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 jupytext = "^1.14.4"
-jsonrpcserver = {extras = ["requests"], version = "^4.1.2"}
-jsonrpcclient = {extras = ["requests"], version = "^3.3.5"}
+jsonrpcserver = "^5.0.9"
+jsonrpcclient = "^4.0.3"
 loguru = ">=0.4.1"
 edlib = "^1.3.8"
+requests = "^2.31.0"
+aiohttp = "^3.8.4"
 
 [tool.poetry.dev-dependencies]
 python-language-server = {extras = ["all"], version = "^0.31.9"}

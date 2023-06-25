@@ -15,9 +15,10 @@ from typing import Optional
 from typing import Type
 
 import jupytext
-from IPython.display import display
+import requests
 from ipykernel.comm import Comm
 from jsonrpcclient import request
+from jsonrpcserver import Success
 from loguru import logger
 
 from jupyter_ascending._environment import EXECUTE_HOST_URL
@@ -59,17 +60,19 @@ def start_notebook_server_in_thread(notebook_name: str, status_widget=None):
     notebook_server_port = find_free_port()
 
     notebook_executor = HTTPServer(("localhost", notebook_server_port), NotebookKernelRequestHandler,)
-    notebook_executor_thread = threading.Thread(target=notebook_executor.serve_forever, args=tuple())
+    notebook_executor_thread = threading.Thread(target=notebook_executor.serve_forever)
     notebook_executor_thread.start()
 
     logger.info("IPYTHON: Registering notebook {}", notebook_path)
-    request(
-        EXECUTE_HOST_URL,
+    json = request(
         register_notebook_server.__name__,
-        # Params
-        notebook_path=str(notebook_path),
-        port_number=notebook_server_port,
+        params=dict(
+            notebook_path=str(notebook_path),
+            port_number=notebook_server_port,
+        ),
     )
+
+    requests.post(EXECUTE_HOST_URL, json=json)
     logger.info("==> Success")
 
 
@@ -86,7 +89,7 @@ def dispatch_json_request(f):
     request_type = signature(f).parameters["request_type"].annotation.__args__[0]
 
     def wrapped(data: Dict) -> str:
-        return f(request_type, data)
+        return Success(f(request_type, data))
 
     wrapped.__name__ = request_type.__name__
 
