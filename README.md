@@ -25,8 +25,8 @@ python -m jupyter serverextension enable jupyter_ascending --sys-prefix --py
 
 You can confirm it's installed by checking for `jupyter_ascending` in:
 ```
-$ jupyter nbextension     list
-$ jupyter serverextension list
+$ python -m jupyter nbextension     list
+$ python -m jupyter serverextension list
 ```
 
 If your jupyter setup includes multiple python kernels that you'd like to use with jupyter ascending, you'll need to complete this setup in each of those python environments separately.
@@ -42,7 +42,7 @@ If your jupyter setup includes multiple python kernels that you'd like to use wi
 
 2) Start jupyter and open the notebook:
 
-   `jupyter notebook example.sync.ipynb`
+   `python -m jupyter notebook example.sync.ipynb`
 
 
 3) Add some code to the `.sync.py` file, e.g.
