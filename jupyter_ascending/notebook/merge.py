@@ -10,7 +10,7 @@ from typing import Tuple
 from typing import Union
 
 import attr
-import edlib
+import editdistance
 
 from jupyter_ascending.notebook.data_types import CellMovements
 from jupyter_ascending.notebook.data_types import JupyterCell
@@ -221,7 +221,7 @@ class LevenshteinDistance(BaseStringDistancer):
     @staticmethod
     def find_distance(string_1: str, string_2: str) -> int:
         # TODO: Maybe use jaro winkler instead
-        return edlib.align(string_1, string_2)["editDistance"]
+        return editdistance.eval(string_1, string_2)
 
     @staticmethod
     def sort_function(distance: CellDistance) -> Number:
