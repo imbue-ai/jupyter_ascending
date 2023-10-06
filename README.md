@@ -115,24 +115,24 @@ To do local development (only needed if you're modifying the jupyter-ascending c
 # Install poetry system-wide (not the python package!)
 # (https://python-poetry.org/docs/#installation)
 
-# install dependencies (will install from the lock file)
+# install dependencies (will install from the lock file, see below if you need to update the lockfile)
 $ poetry install
 
 # Activate the poetry env
 $ poetry shell
 
 # Installs the extension, using symlinks
-$ jupyter nbextension install --py --sys-prefix --symlink jupyter_ascending
+$ python -m jupyter nbextension install --py --sys-prefix --symlink jupyter_ascending
 
 # Enables them, so it auto loads
-$ jupyter nbextension enable jupyter_ascending --py --sys-prefix
-$ jupyter serverextension enable jupyter_ascending --sys-prefix --py
+$ python -m jupyter nbextension enable jupyter_ascending --py --sys-prefix
+$ python -m jupyter serverextension enable jupyter_ascending --sys-prefix --py
 ```
 
 To check that they are enabled, do something like this:
 
 ```
-$ jupyter nbextension list
+$ python -m jupyter nbextension list
 Known nbextensions:
   config dir: /home/tj/.pyenv/versions/3.8.1/envs/general/etc/jupyter/nbconfig
     notebook section
@@ -143,7 +143,7 @@ Known nbextensions:
       jupyter_ascending/extension  enabled
       - Validating: OK
 
-$ jupyter serverextension list
+$ python -m jupyter serverextension list
 config dir: /home/tj/.pyenv/versions/3.8.1/envs/general/etc/jupyter
     jupytext  enabled
     - Validating...
